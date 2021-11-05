@@ -9,8 +9,8 @@ import androidx.compose.material.MaterialTheme
 import androidx.compose.material.Surface
 import androidx.compose.material.Text
 import androidx.compose.runtime.Composable
-import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.*
+import androidx.compose.ui.Alignment
 import androidx.compose.ui.Alignment.Companion.CenterHorizontally
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.shadow
@@ -26,16 +26,16 @@ import com.example.pokedexapp.R
 @Composable
 fun PokemonListScreen(
     navController: NavController
-){
+) {
     Surface(
         color = MaterialTheme.colors.background,
         modifier = Modifier.fillMaxSize()
-    ){
+    ) {
         Column {
             Spacer(modifier = Modifier.height(20.dp))
             Image(
                 painter = painterResource(id = R.drawable.ic_international_pok_mon_logo),
-                contentDescription = "Pokemon Logo",
+                contentDescription = "Pokemon",
                 modifier = Modifier
                     .fillMaxWidth()
                     .align(CenterHorizontally)
@@ -45,28 +45,27 @@ fun PokemonListScreen(
                 modifier = Modifier
                     .fillMaxWidth()
                     .padding(16.dp)
-            ){
-                
+            ) {
+
             }
         }
-
     }
 }
 
 @Composable
 fun SearchBar(
-    modifier : Modifier = Modifier,
+    modifier: Modifier = Modifier,
     hint: String = "",
     onSearch: (String) -> Unit = {}
-){
+) {
     var text by remember {
         mutableStateOf("")
     }
-    var isHintDisplayed by remember{
-        mutableStateOf( hint != "")
+    var isHintDisplayed by remember {
+        mutableStateOf(hint != "")
     }
 
-    Box(modifier = modifier){
+    Box(modifier = modifier) {
         BasicTextField(
             value = text,
             onValueChange = {
@@ -85,7 +84,7 @@ fun SearchBar(
                     isHintDisplayed = !it.isFocused
                 }
         )
-        if(isHintDisplayed){
+        if(isHintDisplayed) {
             Text(
                 text = hint,
                 color = Color.LightGray,
