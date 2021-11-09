@@ -1,7 +1,7 @@
 package com.example.pokedexapp.di
 
 import com.example.pokedexapp.data.remote.PokeApi
-import com.example.pokedexapp.repository.PokemonRepository
+import com.example.pokedexapp.repository.DefaultPokemonRepository
 import com.example.pokedexapp.util.constants.Constants.BASE_URL
 import dagger.Module
 import dagger.Provides
@@ -19,7 +19,7 @@ object AppModule {
     @Provides
     fun providePokemonRepository(
         api: PokeApi
-    ) = PokemonRepository(api)
+    ) = DefaultPokemonRepository(api)
 
     @Singleton @Provides
     fun providePokeApi(): PokeApi {
