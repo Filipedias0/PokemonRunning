@@ -10,8 +10,8 @@ import org.junit.Before
 @MediumTest
 @ExperimentalCoroutinesApi
 class PokedexInstrumentedTests {
-    var hiltRule = HiltAndroidRule(this)
-    
+    private var hiltRule = HiltAndroidRule(this)
+
     @Before
     fun setup(){
         hiltRule.inject()
