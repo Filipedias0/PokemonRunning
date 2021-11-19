@@ -1,17 +1,15 @@
 package com.example.pokedexapp.pokemonList
 
-import android.content.Context
 import android.graphics.Bitmap
 import android.graphics.drawable.BitmapDrawable
 import android.graphics.drawable.Drawable
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.ui.graphics.Color
-import androidx.compose.ui.text.capitalize
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
 import androidx.palette.graphics.Palette
 import com.example.pokedexapp.data.models.PokedexListEntry
-import com.example.pokedexapp.repository.DefaultPokemonRepository
+import com.example.pokedexapp.repository.PokemonRepository
 import com.example.pokedexapp.util.Resource
 import com.example.pokedexapp.util.constants.Constants.PAGE_SIZE
 import dagger.hilt.android.lifecycle.HiltViewModel
@@ -22,13 +20,13 @@ import javax.inject.Inject
 
 @HiltViewModel
 class PokemonListViewModel @Inject constructor(
-    private val defaultRepository: DefaultPokemonRepository
+    private val repository: PokemonRepository
 ) : ViewModel() {
 
     private var curPage = 0
 
     var pokemonList = mutableStateOf<List<PokedexListEntry>>(listOf())
-    var loadError = mutableStateOf("")
+    var loadStatus = mutableStateOf("")
     var isLoading = mutableStateOf(false)
     var endReached = mutableStateOf(false)
 
@@ -66,11 +64,15 @@ class PokemonListViewModel @Inject constructor(
         }
     }
 
+     fun returnNetworkError(){
+        repository.setShouldReturnNetworkError(true)
+    }
+
     fun loadPokemonPaginated() {
         viewModelScope.launch {
             isLoading.value = true
 
-            val result = defaultRepository.getPokemonList(PAGE_SIZE, curPage * PAGE_SIZE)
+            val result = repository.getPokemonList(PAGE_SIZE, curPage * PAGE_SIZE)
             when ((result)) {
                 is Resource.Succes -> {
                     endReached.value = curPage * PAGE_SIZE >= result.data!!.count
@@ -88,22 +90,16 @@ class PokemonListViewModel @Inject constructor(
                     }
                     curPage++
 
-                    loadError.value = ""
+                    loadStatus.value = "Success"
                     isLoading.value = false
                     pokemonList.value += pokedexEntries
                 }
                 is Resource.Error -> {
-                    loadError.value = result.message!!
+                    loadStatus.value = result.message!!
                     isLoading.value = false
                 }
             }
         }
-    }
-
-    fun pokemonDetails(
-        pokemonName: String
-    ): Boolean {
-        return true
     }
 
     fun calcDominantColor(

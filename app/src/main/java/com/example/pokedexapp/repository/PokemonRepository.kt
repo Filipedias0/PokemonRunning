@@ -7,4 +7,5 @@ import com.example.pokedexapp.util.Resource
 interface PokemonRepository {
     suspend fun getPokemonList(limit: Int, offset: Int): Resource<PokemonList>
     suspend fun getPokemonInfo(pokemonName: String): Resource<Pokemon>
+    fun setShouldReturnNetworkError(value: Boolean)
 }

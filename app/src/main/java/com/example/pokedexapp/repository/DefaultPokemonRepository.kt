@@ -13,6 +13,10 @@ class DefaultPokemonRepository @Inject constructor(
     private val api: PokeApi
 ) : PokemonRepository {
 
+    override fun setShouldReturnNetworkError(value: Boolean) {
+        TODO("Not yet implemented")
+    }
+
     override suspend fun getPokemonList(limit: Int, offset: Int): Resource<PokemonList> {
         val response = try {
             api.getPokemonList(limit, offset)

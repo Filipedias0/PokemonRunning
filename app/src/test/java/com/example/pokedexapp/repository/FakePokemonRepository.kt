@@ -6,7 +6,7 @@ import com.example.pokedexapp.util.Resource
 class FakePokemonRepository : PokemonRepository{
 private var shouldReturnNetworkError = false
 
-    fun setShouldReturnNetworkError(value: Boolean){
+    override fun setShouldReturnNetworkError(value: Boolean){
         shouldReturnNetworkError = value
     }
 
@@ -25,7 +25,7 @@ private var shouldReturnNetworkError = false
             return Resource.Succes(
                 Pokemon(
                     listOf(), 0, listOf(), listOf(), 0, listOf(), 0,
-                    false, "", listOf(), "", 0, listOf(),
+                    false, "", listOf(), "Charmander", 0, listOf(),
                     Species(
                         "", ""
                     ),
