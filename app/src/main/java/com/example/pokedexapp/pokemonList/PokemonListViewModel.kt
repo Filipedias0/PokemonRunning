@@ -90,7 +90,7 @@ class PokemonListViewModel @Inject constructor(
                     }
                     curPage++
 
-                    loadStatus.value = "Success"
+                    loadStatus.value = "Oops"
                     isLoading.value = false
                     pokemonList.value += pokedexEntries
                 }
