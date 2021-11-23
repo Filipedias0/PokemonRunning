@@ -14,6 +14,7 @@ import androidx.compose.material.MaterialTheme
 import androidx.compose.material.Text
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.ArrowBack
+import androidx.compose.material.icons.filled.Favorite
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.produceState
@@ -76,7 +77,7 @@ fun PokemonDetailScreen(
             modifier = Modifier
                 .fillMaxSize()
                 .padding(
-                    top = topPadding + pokemonImageSize / 2f,
+                    top = pokemonImageSize / 2f,
                     start = 16.dp,
                     end = 16.dp,
                     bottom = 16.dp
@@ -106,7 +107,6 @@ fun PokemonDetailScreen(
                         contentDescription = pokemonInfo.data.name,
                         modifier = Modifier
                             .size(pokemonImageSize)
-                            .offset(y = topPadding)
                     )
                 }
             }
@@ -183,26 +183,54 @@ fun PokemonDetailSection(
     modifier: Modifier = Modifier
 ) {
     val scrollState = rememberScrollState()
+
     Column(
         horizontalAlignment = Alignment.CenterHorizontally,
         modifier = modifier
             .fillMaxSize()
-            .offset(y = 100.dp)
-            .verticalScroll(scrollState)
     ) {
-        Text(
-            text = "#${pokemonInfo.id} ${pokemonInfo.name.capitalize(Locale.ROOT)}",
-            fontWeight = FontWeight.Bold,
-            fontSize = 30.sp,
-            textAlign = TextAlign.Center,
-            color = MaterialTheme.colors.onSurface
-        )
-        PokemonTypeSection(types = pokemonInfo.types)
-        PokemonDetailDataSection(
-            pokemonWeight = pokemonInfo.weight,
-            pokemonHeight = pokemonInfo.height
-        )
-        PokemonBaseStats(pokemonInfo = pokemonInfo)
+
+        Row(
+            horizontalArrangement = Arrangement.End,
+            verticalAlignment =  Alignment.CenterVertically,
+            modifier = Modifier
+                .fillMaxWidth()
+                .height(60.dp)
+        ){
+            Icon(
+                imageVector = Icons.Default.Favorite,
+                contentDescription = "Favorite Pokemon",
+                tint = Color.Red,
+                modifier = Modifier
+                    .size(36.dp)
+                    .clickable {
+
+                    }
+            )
+        }
+
+        Column(
+            horizontalAlignment = Alignment.CenterHorizontally,
+            modifier = Modifier
+            .offset(y = 25.dp)
+            .fillMaxSize()
+            .verticalScroll(scrollState)
+        ) {
+            Text(
+                text = "#${pokemonInfo.id} ${pokemonInfo.name.capitalize(Locale.ROOT)}",
+                fontWeight = FontWeight.Bold,
+                fontSize = 30.sp,
+                textAlign = TextAlign.Center,
+                color = MaterialTheme.colors.onSurface,
+                modifier = Modifier
+            )
+            PokemonTypeSection(types = pokemonInfo.types)
+            PokemonDetailDataSection(
+                pokemonWeight = pokemonInfo.weight,
+                pokemonHeight = pokemonInfo.height
+            )
+            PokemonBaseStats(pokemonInfo = pokemonInfo)
+        }
     }
 }
 
