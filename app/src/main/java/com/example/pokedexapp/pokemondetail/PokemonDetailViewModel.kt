@@ -1,6 +1,7 @@
 package com.example.pokedexapp.pokemondetail
 
 import androidx.lifecycle.ViewModel
+import com.example.pokedexapp.data.models.PokedexListEntry
 import com.example.pokedexapp.data.remote.responses.Pokemon
 import com.example.pokedexapp.repository.DefaultPokemonRepository
 import com.example.pokedexapp.repository.PokemonRepository
@@ -15,5 +16,9 @@ class PokemonDetailViewModel @Inject constructor(
 
     suspend fun getPokemonInfo(pokemonName: String): Resource<Pokemon> {
         return repository.getPokemonInfo(pokemonName)
+    }
+
+    suspend fun insertFavPokemon(pokemon: PokedexListEntry){
+        repository.insertFavPokemon(pokemon)
     }
 }

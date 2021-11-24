@@ -180,7 +180,8 @@ fun PokemonDetailStateWrapper(
 @Composable
 fun PokemonDetailSection(
     pokemonInfo: Pokemon,
-    modifier: Modifier = Modifier
+    modifier: Modifier = Modifier,
+    viewModel: PokemonDetailViewModel = hiltViewModel()
 ) {
     val scrollState = rememberScrollState()
 
@@ -212,9 +213,9 @@ fun PokemonDetailSection(
         Column(
             horizontalAlignment = Alignment.CenterHorizontally,
             modifier = Modifier
-            .offset(y = 25.dp)
-            .fillMaxSize()
-            .verticalScroll(scrollState)
+                .offset(y = 25.dp)
+                .fillMaxSize()
+                .verticalScroll(scrollState)
         ) {
             Text(
                 text = "#${pokemonInfo.id} ${pokemonInfo.name.capitalize(Locale.ROOT)}",

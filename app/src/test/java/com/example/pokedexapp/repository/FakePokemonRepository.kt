@@ -1,6 +1,8 @@
 package com.example.pokedexapp.repository
 
+import com.example.pokedexapp.data.models.PokedexListEntry
 import com.example.pokedexapp.data.remote.responses.*
+import com.example.pokedexapp.pokemondetail.PokemonDetailViewModel
 import com.example.pokedexapp.util.Resource
 
 class FakePokemonRepository : PokemonRepository{
@@ -102,5 +104,14 @@ private var shouldReturnNetworkError = false
                 )
             )
         }
+
+
+    }
+
+    override suspend fun insertFavPokemon(pokemon: PokedexListEntry) {
+        TODO("Not yet implemented")
+    }
+    override suspend fun getFavPokemons(pokemonList: PokemonList) {
+        TODO("Not yet implemented")
     }
 }

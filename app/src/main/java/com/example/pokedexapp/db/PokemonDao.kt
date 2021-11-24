@@ -11,8 +11,6 @@ interface PokemonDao {
     suspend fun insertFavPokemons(pokemon: PokedexListEntry): Long
 
     @Query("SELECT * FROM favPokemons")
-    fun getAllFavPokemons(): LiveData<List<PokedexListEntry>>
+    fun observeAllFavPokemons(): LiveData<List<PokedexListEntry>>
 
-    @Delete
-    suspend fun deleteFavPokemon(pokemon: PokedexListEntry)
 }
