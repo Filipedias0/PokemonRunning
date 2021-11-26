@@ -5,10 +5,10 @@ import androidx.room.Room
 import com.example.pokedexapp.data.remote.PokeApi
 import com.example.pokedexapp.db.PokemonDao
 import com.example.pokedexapp.db.PokemonDataBase
-import com.example.pokedexapp.other.Constants.DATABASE_NAME
 import com.example.pokedexapp.repository.DefaultPokemonRepository
 import com.example.pokedexapp.repository.PokemonRepository
 import com.example.pokedexapp.util.constants.Constants.BASE_URL
+import com.example.pokedexapp.util.constants.Constants.DATABASE_NAME
 import dagger.Module
 import dagger.Provides
 import dagger.hilt.InstallIn

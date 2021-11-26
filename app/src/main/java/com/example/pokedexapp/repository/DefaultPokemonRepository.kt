@@ -1,5 +1,6 @@
 package com.example.pokedexapp.repository
 
+import androidx.lifecycle.LiveData
 import com.example.pokedexapp.data.models.PokedexListEntry
 import com.example.pokedexapp.data.remote.PokeApi
 import com.example.pokedexapp.data.remote.responses.Pokemon
@@ -43,7 +44,7 @@ class DefaultPokemonRepository @Inject constructor(
         pokemonDao.insertFavPokemons(pokemon)
     }
 
-    override suspend fun getFavPokemons(pokemonList: PokemonList) {
-        TODO("Not yet implemented")
+    override fun observeFavPokemons(): LiveData<List<PokedexListEntry>> {
+        return pokemonDao.observeAllFavPokemons()
     }
 }

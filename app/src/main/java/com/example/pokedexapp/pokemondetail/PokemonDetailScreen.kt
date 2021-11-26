@@ -1,6 +1,7 @@
 package com.example.pokedexapp.pokemondetail
 
 import android.graphics.Paint
+import android.widget.Toast
 import androidx.compose.animation.core.animateFloatAsState
 import androidx.compose.animation.core.tween
 import androidx.compose.animation.fadeIn
@@ -39,6 +40,7 @@ import androidx.hilt.navigation.compose.hiltViewModel
 import androidx.navigation.NavController
 import coil.compose.rememberImagePainter
 import com.example.pokedexapp.R
+import com.example.pokedexapp.data.models.PokedexListEntry
 import com.example.pokedexapp.data.remote.responses.Pokemon
 import com.example.pokedexapp.data.remote.responses.Type
 import com.example.pokedexapp.util.Resource
@@ -205,7 +207,7 @@ fun PokemonDetailSection(
                 modifier = Modifier
                     .size(36.dp)
                     .clickable {
-
+                        viewModel.insertFavPokemon(PokedexListEntry(pokemonInfo.id, pokemonInfo.name, pokemonInfo.sprites.front_default, pokemonInfo.id ))
                     }
             )
         }

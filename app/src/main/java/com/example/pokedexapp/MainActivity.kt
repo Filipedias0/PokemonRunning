@@ -14,8 +14,9 @@ import androidx.compose.ui.tooling.preview.Preview
 import androidx.navigation.NavType
 import androidx.navigation.compose.NavHost
 import androidx.navigation.compose.composable
-import androidx.navigation.compose.navArgument
 import androidx.navigation.compose.rememberNavController
+import androidx.navigation.navArgument
+import com.example.pokedexapp.favPokemons.FavPokemonsScreen
 import com.example.pokedexapp.pokemonList.PokemonListScreen
 import com.example.pokedexapp.pokemondetail.PokemonDetailScreen
 import com.example.pokedexapp.ui.theme.PokedexAppTheme
@@ -59,6 +60,9 @@ class MainActivity : ComponentActivity() {
                             pokemonName = pokemonName?.toLowerCase(Locale.ROOT) ?: "",
                             navController = navController
                         )
+                    }
+                    composable("fav_pokemons_screen"){
+                        FavPokemonsScreen(navController = navController)
                     }
                 }
             }
