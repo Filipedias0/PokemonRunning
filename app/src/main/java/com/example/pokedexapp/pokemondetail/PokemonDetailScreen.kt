@@ -203,11 +203,11 @@ fun PokemonDetailSection(
             Icon(
                 imageVector = Icons.Default.Favorite,
                 contentDescription = "Favorite Pokemon",
-                tint = Color.Red,
+                tint = Color.LightGray,
                 modifier = Modifier
                     .size(36.dp)
                     .clickable {
-                        viewModel.insertFavPokemon(PokedexListEntry(pokemonName = pokemonInfo.name, imageUrl = pokemonInfo.sprites.front_default, number = pokemonInfo.id ))
+                        updateFavPokemon(viewModel, pokemonInfo)
                     }
             )
         }
@@ -235,6 +235,10 @@ fun PokemonDetailSection(
             PokemonBaseStats(pokemonInfo = pokemonInfo)
         }
     }
+}
+
+fun updateFavPokemon( viewModel: PokemonDetailViewModel, pokemonInfo: Pokemon) {
+    viewModel.insertFavPokemon(PokedexListEntry(pokemonName = pokemonInfo.name, imageUrl = pokemonInfo.sprites.versions.generationV.blackWhite.animated.front_default, number = pokemonInfo.id, id = pokemonInfo.id ))
 }
 
 @Composable

@@ -86,11 +86,11 @@ class PokemonListViewModel @Inject constructor(
                         }
                         val url =
                             "https://raw.githubusercontent.com/PokeAPI/sprites/master/sprites/pokemon/${number}.png"
-                        PokedexListEntry(null, entry.name.capitalize(Locale.ROOT), url, number.toInt())
+                        PokedexListEntry( pokemonName = entry.name.capitalize(Locale.ROOT), imageUrl = url, number = number.toInt())
                     }
                     curPage++
 
-                    loadStatus.value = "Oops"
+                    loadStatus.value = ""
                     isLoading.value = false
                     pokemonList.value += pokedexEntries
                 }

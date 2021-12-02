@@ -1,5 +1,6 @@
 package com.example.pokedexapp.data.models
 
+import androidx.room.ColumnInfo
 import androidx.room.Entity
 import androidx.room.PrimaryKey
 
@@ -8,8 +9,7 @@ import androidx.room.PrimaryKey
 
 )
 class PokedexListEntry (
-    @PrimaryKey(autoGenerate = true)
-    val id: Int? = null,
+    @PrimaryKey(autoGenerate = false)@ColumnInfo(name = "id") val id: Int?= null,
     val pokemonName: String,
     val imageUrl: String,
     val number: Int

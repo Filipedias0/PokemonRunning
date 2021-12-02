@@ -4,6 +4,7 @@ import android.os.Bundle
 import androidx.activity.ComponentActivity
 import androidx.activity.compose.setContent
 import androidx.compose.foundation.layout.Column
+import androidx.compose.foundation.layout.size
 import androidx.compose.material.*
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.Favorite
@@ -49,7 +50,7 @@ class MainActivity : ComponentActivity() {
                             items = listOf(
                                 BottomNavItem(
                                     name = "Home",
-                                    route = "fav_pokemons_screen",
+                                    route = "pokemon_list_screen",
                                     icon = Icons.Default.Home
                                 ),
                                 BottomNavItem(
@@ -129,8 +130,8 @@ fun BottomNavigationBar(
     val backStackEntry = navController.currentBackStackEntryAsState()
     BottomNavigation(
         modifier = modifier,
-        backgroundColor = Color.LightGray,
-        elevation = 5.dp
+        backgroundColor = Color.Unspecified,
+        elevation = 0.dp
     ){
         items.forEach { item ->
             val selected = item.route == backStackEntry.value?.destination?.route
@@ -140,32 +141,11 @@ fun BottomNavigationBar(
                 selectedContentColor = Color.Yellow,
                 unselectedContentColor = Color.Gray,
                 icon = {
-                       Column(horizontalAlignment = CenterHorizontally) {
-                            if(item.badgeCount > 0 ){
-                                BadgeBox(
-                                    badgeContent = {
-                                        Text(text = item.badgeCount.toString())
-                                    }
-                                ) {
-                                    Icon(
-                                        imageVector = item.icon,
-                                        contentDescription = item.name
-                                    )
-                                }
-                            }else{
                                 Icon(
+                                    modifier = Modifier.size(32.dp),
                                     imageVector = item.icon,
                                     contentDescription = item.name
                                 )
-                            }
-                           if(selected){
-                               Text(
-                                   text = item.name,
-                                   textAlign =  TextAlign.Center,
-                                   fontSize = 10.sp
-                               )
-                           }
-                       }
                 },
             )
         }

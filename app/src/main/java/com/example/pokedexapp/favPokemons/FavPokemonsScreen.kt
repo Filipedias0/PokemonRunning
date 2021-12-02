@@ -1,35 +1,49 @@
 package com.example.pokedexapp.favPokemons
 
+import android.os.Build
 import androidx.compose.foundation.Image
+import androidx.compose.foundation.background
+import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.*
 import androidx.compose.foundation.lazy.LazyColumn
+import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material.CircularProgressIndicator
 import androidx.compose.material.MaterialTheme
 import androidx.compose.material.Surface
 import androidx.compose.material.Text
-import androidx.compose.runtime.Composable
-import androidx.compose.runtime.LaunchedEffect
-import androidx.compose.runtime.getValue
+import androidx.compose.runtime.*
 import androidx.compose.runtime.livedata.observeAsState
-import androidx.compose.runtime.remember
 import androidx.compose.ui.Alignment
+import androidx.compose.ui.Alignment.Companion.Center
+import androidx.compose.ui.Alignment.Companion.CenterHorizontally
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.draw.clip
+import androidx.compose.ui.draw.shadow
+import androidx.compose.ui.graphics.Brush
+import androidx.compose.ui.graphics.toArgb
+import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.res.painterResource
+import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.unit.dp
+import androidx.compose.ui.unit.sp
 import androidx.hilt.navigation.compose.hiltViewModel
 import androidx.navigation.NavController
+import coil.ImageLoader
+import coil.annotation.ExperimentalCoilApi
+import coil.compose.rememberImagePainter
+import coil.decode.GifDecoder
+import coil.decode.ImageDecoderDecoder
+import coil.memory.MemoryCache
+import coil.request.ImageRequest
 import com.example.pokedexapp.R
 import com.example.pokedexapp.data.models.PokedexListEntry
-import com.example.pokedexapp.pokemonList.PokedexRow
-import com.example.pokedexapp.pokemonList.PokemonListViewModel
-import com.example.pokedexapp.pokemonList.RetrySection
+import com.plcoding.jetpackcomposepokedex.ui.theme.RobotoCondensed
 
 @Composable
 fun FavPokemonsScreen(
     navController: NavController,
     viewModel: FavPokemonsViewModel = hiltViewModel()
 ){
-    val pokedexListEntry : List<PokedexListEntry> by viewModel.favPokemons.observeAsState(initial = listOf())
     Surface(
         color = MaterialTheme.colors.background,
         modifier = Modifier.fillMaxSize()
@@ -44,7 +58,7 @@ fun FavPokemonsScreen(
                     .align(Alignment.CenterHorizontally)
             )
             Spacer(modifier = Modifier.height(16.dp))
-            PokemonList(navController = navController, pokedexListEntry)
+            PokemonList(navController = navController)
         }
     }
 
@@ -53,14 +67,9 @@ fun FavPokemonsScreen(
 @Composable
 fun PokemonList(
     navController: NavController,
-    favPokemon: List<PokedexListEntry>,
-    viewModel: PokemonListViewModel = hiltViewModel()
+    viewModel: FavPokemonsViewModel = hiltViewModel()
 ){
-    val pokemonList by remember { viewModel.pokemonList }
-    val endReached by remember { viewModel.endReached }
-    val loadError by remember { viewModel.loadStatus }
-    val isLoading by remember { viewModel.isLoading }
-    val isSearching by remember { viewModel.isSearching }
+    val pokemonList : List<PokedexListEntry> by viewModel.favPokemons.observeAsState(initial = listOf())
 
     LazyColumn(contentPadding = PaddingValues(16.dp)){
         val itemCount = if(pokemonList.size % 2 == 0){
@@ -69,28 +78,115 @@ fun PokemonList(
             pokemonList.size /2 + 1
         }
         items(itemCount){
-            if( it >= itemCount - 1 && !endReached && !isLoading && !isSearching){
-                LaunchedEffect(key1 = true){
-                    viewModel.loadPokemonPaginated()
-                }
-            }
-            Text(text = favPokemon[0].pokemonName)
             PokedexRow(rowIndex = it, entries = pokemonList, navController = navController)
         }
     }
+}
+
+@ExperimentalCoilApi
+@Composable
+fun PokedexEntry(
+    entry: PokedexListEntry,
+    navController: NavController,
+    modifier: Modifier = Modifier,
+    viewModel: FavPokemonsViewModel = hiltViewModel()
+){
+    val defaultDominantColor = MaterialTheme.colors.surface
+    var dominantColor by remember {
+        mutableStateOf(defaultDominantColor)
+    }
 
     Box(
-        contentAlignment = Alignment.Center,
-        modifier = Modifier.fillMaxSize()
-    ) {
-        if(isLoading){
-            CircularProgressIndicator( color = MaterialTheme.colors.primary )
-        }
-        if(loadError.isNotEmpty()){
-            RetrySection(error = loadError) {
-                viewModel.loadPokemonPaginated()
-
+        contentAlignment = Center,
+        modifier = modifier
+            .shadow(5.dp, RoundedCornerShape(10.dp))
+            .clip(RoundedCornerShape(10.dp))
+            .aspectRatio(1f)
+            .background(
+                Brush.verticalGradient(
+                    listOf(
+                        dominantColor,
+                        defaultDominantColor
+                    )
+                )
+            )
+            .clickable {
+                navController.navigate(
+                    "pokemon_detail_screen/${dominantColor.toArgb()}/${entry.pokemonName}"
+                )
             }
+    ){
+        Column {
+            val imageLoader = ImageLoader.Builder(LocalContext.current)
+                .crossfade(true)
+                .build()
+
+            val request = ImageRequest.Builder(LocalContext.current)
+                .data(entry.imageUrl)
+                .target{
+                    viewModel.calcDominantColor(it){ color ->
+                        dominantColor = color
+                    }
+                }
+                .build()
+
+            imageLoader.enqueue(request)
+
+            var gifLoader = ImageLoader.Builder(LocalContext.current)
+                .componentRegistry {
+                    if (Build.VERSION.SDK_INT >= 28) {
+                        add(ImageDecoderDecoder(LocalContext.current))
+                    } else {
+                        add(GifDecoder())
+                    }
+                }
+                .build()
+
+            val painter = rememberImagePainter(entry.imageUrl , gifLoader)
+            Image(
+                painter = painter,
+                contentDescription = entry.pokemonName,
+                modifier = Modifier
+                    .size(120.dp)
+                    .align(CenterHorizontally)
+            )
+
+            Text(
+                text = entry.pokemonName,
+                fontFamily = RobotoCondensed,
+                fontSize = 20.sp,
+                textAlign = TextAlign.Center,
+                modifier = Modifier.fillMaxWidth()
+            )
         }
     }
 }
+
+@Composable
+fun PokedexRow(
+    rowIndex: Int,
+    entries: List<PokedexListEntry>,
+    navController: NavController
+){
+    Column() {
+        Row{
+            PokedexEntry(
+                entry = entries[rowIndex * 2],
+                navController = navController,
+                modifier = Modifier.weight(1f),
+            )
+            Spacer(modifier = Modifier.width(16.dp))
+            if(entries.size >= rowIndex * 2 + 2){
+                PokedexEntry(
+                    entry = entries[rowIndex * 2 + 1],
+                    navController = navController,
+                    modifier = Modifier.weight(1f),
+                )
+            } else {
+                Spacer(modifier = Modifier.weight(1f))
+            }
+        }
+        Spacer(modifier = Modifier.height(16.dp))
+    }
+}
+
