@@ -1,9 +1,11 @@
 package com.example.pokedexapp.pokemondetail
 
+<<<<<<< Updated upstream
 import android.graphics.Paint
+=======
+>>>>>>> Stashed changes
 import androidx.compose.animation.core.animateFloatAsState
 import androidx.compose.animation.core.tween
-import androidx.compose.animation.fadeIn
 import androidx.compose.foundation.*
 import androidx.compose.foundation.layout.*
 import androidx.compose.foundation.shape.CircleShape
@@ -25,13 +27,10 @@ import androidx.compose.ui.draw.shadow
 import androidx.compose.ui.graphics.Brush
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.graphics.painter.Painter
-import androidx.compose.ui.layout.VerticalAlignmentLine
 import androidx.compose.ui.res.painterResource
-import androidx.compose.ui.text.capitalize
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.unit.Dp
-import androidx.compose.ui.unit.ExperimentalUnitApi
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import androidx.hilt.navigation.compose.hiltViewModel
@@ -40,6 +39,7 @@ import coil.compose.rememberImagePainter
 import com.example.pokedexapp.R
 import com.example.pokedexapp.data.remote.responses.Pokemon
 import com.example.pokedexapp.data.remote.responses.Type
+import com.example.pokedexapp.db.FavPokemon
 import com.example.pokedexapp.util.Resource
 import com.example.pokedexapp.util.parseStatToAbbr
 import com.example.pokedexapp.util.parseStatToColor
@@ -190,6 +190,7 @@ fun PokemonDetailSection(
             .offset(y = 100.dp)
             .verticalScroll(scrollState)
     ) {
+<<<<<<< Updated upstream
         Text(
             text = "#${pokemonInfo.id} ${pokemonInfo.name.capitalize(Locale.ROOT)}",
             fontWeight = FontWeight.Bold,
@@ -203,6 +204,50 @@ fun PokemonDetailSection(
             pokemonHeight = pokemonInfo.height
         )
         PokemonBaseStats(pokemonInfo = pokemonInfo)
+=======
+
+        Row(
+            horizontalArrangement = Arrangement.End,
+            verticalAlignment =  Alignment.CenterVertically,
+            modifier = Modifier
+                .fillMaxWidth()
+                .height(60.dp)
+        ){
+            Icon(
+                imageVector = Icons.Default.Favorite,
+                contentDescription = "Favorite Pokemon",
+                tint = Color.Red,
+                modifier = Modifier
+                    .size(36.dp)
+                    .clickable {
+                        viewModel.insertFavPokemon(FavPokemon( pokemonName = pokemonInfo.name, imageUrl = pokemonInfo.sprites.front_default, number = pokemonInfo.id ))
+                    }
+            )
+        }
+
+        Column(
+            horizontalAlignment = Alignment.CenterHorizontally,
+            modifier = Modifier
+                .offset(y = 25.dp)
+                .fillMaxSize()
+                .verticalScroll(scrollState)
+        ) {
+            Text(
+                text = "#${pokemonInfo.id} ${pokemonInfo.name.capitalize(Locale.ROOT)}",
+                fontWeight = FontWeight.Bold,
+                fontSize = 30.sp,
+                textAlign = TextAlign.Center,
+                color = MaterialTheme.colors.onSurface,
+                modifier = Modifier
+            )
+            PokemonTypeSection(types = pokemonInfo.types)
+            PokemonDetailDataSection(
+                pokemonWeight = pokemonInfo.weight,
+                pokemonHeight = pokemonInfo.height
+            )
+            PokemonBaseStats(pokemonInfo = pokemonInfo)
+        }
+>>>>>>> Stashed changes
     }
 }
 

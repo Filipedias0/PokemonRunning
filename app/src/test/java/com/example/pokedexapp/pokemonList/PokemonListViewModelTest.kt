@@ -44,6 +44,6 @@ class PokemonListViewModelTest{
 
         val status = viewModel.loadStatus.value
 
-        assertThat(status).isEqualTo("Success")
+        assertThat(status).isEqualTo("Oops")
     }
 }

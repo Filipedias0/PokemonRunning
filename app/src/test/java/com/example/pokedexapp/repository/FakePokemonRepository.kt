@@ -1,5 +1,10 @@
 package com.example.pokedexapp.repository
 
+<<<<<<< Updated upstream
+=======
+import androidx.lifecycle.LiveData
+import com.example.pokedexapp.data.models.PokedexListEntry
+>>>>>>> Stashed changes
 import com.example.pokedexapp.data.remote.responses.*
 import com.example.pokedexapp.util.Resource
 
@@ -102,5 +107,18 @@ private var shouldReturnNetworkError = false
                 )
             )
         }
+<<<<<<< Updated upstream
+=======
+
+
+    }
+
+    override suspend fun insertFavPokemon(pokemon: PokedexListEntry) {
+        TODO("Not yet implemented")
+    }
+
+    override fun observeFavPokemons(): LiveData<List<PokedexListEntry>> {
+        TODO("Not yet implemented")
+>>>>>>> Stashed changes
     }
 }
