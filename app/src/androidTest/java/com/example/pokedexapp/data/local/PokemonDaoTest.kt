@@ -47,7 +47,7 @@ class PokemonDaoTest {
 
     @Test
     fun insertFavPokemon() = runBlockingTest {
-        val pokemon = PokedexListEntry(1, "name", "url", 1)
+        val pokemon = PokedexListEntry( pokemonName = "name", imageUrl = "url", number = 1)
         dao.insertFavPokemons(pokemon)
 
         val allFavPokemons = dao.observeAllFavPokemons().getOrAwaitValue()

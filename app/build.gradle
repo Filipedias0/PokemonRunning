@@ -49,6 +49,8 @@ android {
 }
 
 dependencies {
+    implementation 'androidx.compose.runtime:runtime-livedata:1.1.0-beta03'
+
 
     //Room
     def room_version = "2.3.0"

@@ -207,7 +207,7 @@ fun PokemonDetailSection(
                 modifier = Modifier
                     .size(36.dp)
                     .clickable {
-                        viewModel.insertFavPokemon(PokedexListEntry(pokemonInfo.id, pokemonInfo.name, pokemonInfo.sprites.front_default, pokemonInfo.id ))
+                        viewModel.insertFavPokemon(PokedexListEntry(pokemonName = pokemonInfo.name, imageUrl = pokemonInfo.sprites.front_default, number = pokemonInfo.id ))
                     }
             )
         }
