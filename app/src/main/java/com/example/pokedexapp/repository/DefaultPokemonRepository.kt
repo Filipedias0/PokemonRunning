@@ -47,4 +47,13 @@ class DefaultPokemonRepository @Inject constructor(
     override fun observeFavPokemons(): LiveData<List<PokedexListEntry>> {
         return pokemonDao.observeAllFavPokemons()
     }
+
+    override suspend fun searchFavPokemons(pokemonName: String): List<PokedexListEntry> {
+        return pokemonDao.searchFavoritePokemon(pokemonName)
+
+    }
+
+    override suspend fun deleteFavPokemon(pokemon: PokedexListEntry) {
+        return pokemonDao.deleteFavPokemon(pokemon)
+    }
 }

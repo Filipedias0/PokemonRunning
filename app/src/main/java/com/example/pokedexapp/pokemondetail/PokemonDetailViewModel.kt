@@ -1,6 +1,7 @@
 package com.example.pokedexapp.pokemondetail
 
 import androidx.lifecycle.LiveData
+import androidx.lifecycle.MutableLiveData
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
 import com.example.pokedexapp.data.models.PokedexListEntry
@@ -17,13 +18,35 @@ class PokemonDetailViewModel @Inject constructor(
     private val repository: PokemonRepository
 ) : ViewModel() {
 
+    var isFavPokemon: MutableLiveData<Boolean> = MutableLiveData()
+
     suspend fun getPokemonInfo(pokemonName: String): Resource<Pokemon> {
-        return repository.getPokemonInfo(pokemonName)
+        val pokemonInfo = repository.getPokemonInfo(pokemonName)
+
+        getIsFavPokemon(pokemonName)
+
+        return pokemonInfo
     }
 
-    fun insertFavPokemon(pokemon: PokedexListEntry){
+    fun isFavPokemonObserver():MutableLiveData<Boolean>{
+        return isFavPokemon
+    }
+
+    fun updateFavPokemon(pokemon: PokedexListEntry, isFavPokemon : Boolean){
         viewModelScope.launch {
-            repository.insertFavPokemon(pokemon)
+            if (isFavPokemon){
+                repository.deleteFavPokemon(pokemon)
+            }else {
+                repository.insertFavPokemon(pokemon)
+            }
+
+            getIsFavPokemon(pokemon.pokemonName)
         }
+    }
+
+    suspend fun getIsFavPokemon(pokemonName: String){
+        val list = repository.searchFavPokemons(pokemonName)
+        list.size
+        isFavPokemon.postValue(!list.isNullOrEmpty())
     }
 }

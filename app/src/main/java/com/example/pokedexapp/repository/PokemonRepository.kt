@@ -13,4 +13,6 @@ interface PokemonRepository {
     fun setShouldReturnNetworkError(value: Boolean)
     suspend fun insertFavPokemon(pokemon: PokedexListEntry)
     fun observeFavPokemons(): LiveData<List<PokedexListEntry>>
+    suspend fun searchFavPokemons(pokemonName: String): List<PokedexListEntry>
+    suspend fun deleteFavPokemon(pokemon: PokedexListEntry)
 }

@@ -13,4 +13,10 @@ interface PokemonDao {
     @Query("SELECT * FROM favPokemons")
     fun observeAllFavPokemons(): LiveData<List<PokedexListEntry>>
 
+    @Query("SELECT * FROM favPokemons WHERE pokemonName LIKE '%' || :favPokemonName || '%' ")
+    suspend fun searchFavoritePokemon(favPokemonName : String): List<PokedexListEntry>
+
+    @Delete
+    suspend fun deleteFavPokemon(pokemon: PokedexListEntry)
+
 }

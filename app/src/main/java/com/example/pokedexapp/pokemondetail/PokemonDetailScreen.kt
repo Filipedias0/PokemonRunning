@@ -1,10 +1,7 @@
 package com.example.pokedexapp.pokemondetail
 
-import android.graphics.Paint
-import android.widget.Toast
 import androidx.compose.animation.core.animateFloatAsState
 import androidx.compose.animation.core.tween
-import androidx.compose.animation.fadeIn
 import androidx.compose.foundation.*
 import androidx.compose.foundation.layout.*
 import androidx.compose.foundation.shape.CircleShape
@@ -20,6 +17,7 @@ import androidx.compose.runtime.Composable
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.produceState
 import androidx.compose.runtime.*
+import androidx.compose.runtime.livedata.observeAsState
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
@@ -27,13 +25,10 @@ import androidx.compose.ui.draw.shadow
 import androidx.compose.ui.graphics.Brush
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.graphics.painter.Painter
-import androidx.compose.ui.layout.VerticalAlignmentLine
 import androidx.compose.ui.res.painterResource
-import androidx.compose.ui.text.capitalize
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.unit.Dp
-import androidx.compose.ui.unit.ExperimentalUnitApi
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import androidx.hilt.navigation.compose.hiltViewModel
@@ -62,6 +57,7 @@ fun PokemonDetailScreen(
     val pokemonInfo = produceState<Resource<Pokemon>>(initialValue = Resource.Loading()){
         value = viewModel.getPokemonInfo(pokemonName)
     }.value
+
     Box(modifier = Modifier
         .fillMaxSize()
         .background(dominantColor)
@@ -186,6 +182,8 @@ fun PokemonDetailSection(
     viewModel: PokemonDetailViewModel = hiltViewModel()
 ) {
     val scrollState = rememberScrollState()
+    val isPokemonFavorite by viewModel.isFavPokemonObserver().observeAsState(initial = false)
+    val tint = if(isPokemonFavorite) Color.Red else Color.LightGray
 
     Column(
         horizontalAlignment = Alignment.CenterHorizontally,
@@ -203,11 +201,11 @@ fun PokemonDetailSection(
             Icon(
                 imageVector = Icons.Default.Favorite,
                 contentDescription = "Favorite Pokemon",
-                tint = Color.LightGray,
+                tint = tint,
                 modifier = Modifier
                     .size(36.dp)
                     .clickable {
-                        updateFavPokemon(viewModel, pokemonInfo)
+                        updateFavPokemon(viewModel, pokemonInfo, isPokemonFavorite)
                     }
             )
         }
@@ -237,8 +235,8 @@ fun PokemonDetailSection(
     }
 }
 
-fun updateFavPokemon( viewModel: PokemonDetailViewModel, pokemonInfo: Pokemon) {
-    viewModel.insertFavPokemon(PokedexListEntry(pokemonName = pokemonInfo.name, imageUrl = pokemonInfo.sprites.versions.generationV.blackWhite.animated.front_default, number = pokemonInfo.id, id = pokemonInfo.id ))
+fun updateFavPokemon( viewModel: PokemonDetailViewModel, pokemonInfo: Pokemon, isFavPokemon: Boolean) {
+    viewModel.updateFavPokemon(PokedexListEntry(pokemonName = pokemonInfo.name, imageUrl = pokemonInfo.sprites.versions.generationV.blackWhite.animated.front_default, number = pokemonInfo.id, id = pokemonInfo.id ), isFavPokemon)
 }
 
 @Composable
