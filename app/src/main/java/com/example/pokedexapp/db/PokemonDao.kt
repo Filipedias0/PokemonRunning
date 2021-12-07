@@ -8,7 +8,7 @@ import com.example.pokedexapp.data.models.PokedexListEntry
 interface PokemonDao {
 
     @Insert(onConflict = OnConflictStrategy.REPLACE)
-    suspend fun insertFavPokemons(pokemon: PokedexListEntry): Long
+    suspend fun insertFavPokemons(pokemon: PokedexListEntry)
 
     @Query("SELECT * FROM favPokemons")
     fun observeAllFavPokemons(): LiveData<List<PokedexListEntry>>

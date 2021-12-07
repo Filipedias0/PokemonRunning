@@ -11,6 +11,7 @@ import dagger.hilt.android.testing.HiltAndroidRule
 import dagger.hilt.android.testing.HiltAndroidTest
 import kotlinx.coroutines.ExperimentalCoroutinesApi
 import kotlinx.coroutines.test.runBlockingTest
+import okhttp3.internal.wait
 import org.junit.After
 import org.junit.Before
 import org.junit.Rule
@@ -47,11 +48,38 @@ class PokemonDaoTest {
 
     @Test
     fun insertFavPokemon() = runBlockingTest {
-        val pokemon = PokedexListEntry( pokemonName = "name", imageUrl = "url", number = 1)
+        val pokemon = PokedexListEntry( pokemonName = "name", imageUrl = "url", number = 0)
         dao.insertFavPokemons(pokemon)
 
         val allFavPokemons = dao.observeAllFavPokemons().getOrAwaitValue()
 
-        assertThat(allFavPokemons).contains(pokemon)
+        val insertStatus = allFavPokemons.find { pokedexListEntry -> pokedexListEntry.pokemonName == pokemon.pokemonName }
+
+        assertThat(insertStatus).isNotNull()
+    }
+
+    @Test
+    fun deleteFavPokemon() = runBlockingTest {
+
+        dao.insertFavPokemons(PokedexListEntry( pokemonName = "test", imageUrl = "url", number = 0))
+
+        val insertedPokemon = dao.observeAllFavPokemons().getOrAwaitValue()[0]
+
+        dao.deleteFavPokemon(insertedPokemon)
+
+        val insertStatus =  dao.observeAllFavPokemons().getOrAwaitValue().isNullOrEmpty()
+
+        assertThat(insertStatus).isEqualTo(true)
+    }
+
+    @Test
+    fun searchFavPokemon() = runBlockingTest {
+        dao.insertFavPokemons(PokedexListEntry( pokemonName = "name", imageUrl = "url", number = 0))
+
+        val isFav = dao.searchFavoritePokemon("name")
+
+        val searchStatus = isFav.find { pokedexListEntry -> pokedexListEntry.pokemonName == "name" }
+
+        assertThat(searchStatus).isNotNull()
     }
 }
