@@ -51,6 +51,10 @@ android {
 dependencies {
     implementation 'androidx.compose.runtime:runtime-livedata:1.1.0-beta03'
     implementation("io.coil-kt:coil-gif:1.4.0")
+    implementation 'com.google.android.gms:play-services-location:18.0.0'
+    implementation 'com.google.android.gms:play-services-maps:18.0.0'
+    implementation 'pub.devrel:easypermissions:3.0.0'
+    implementation 'com.github.PhilJay:MPAndroidChart:v3.1.0'
 
 
     //Room
