@@ -1,15 +1,24 @@
 package com.example.pokedexapp.repository
 
+import androidx.lifecycle.LiveData
+import androidx.lifecycle.MutableLiveData
 import com.example.pokedexapp.data.models.PokedexListEntry
 import com.example.pokedexapp.data.remote.responses.*
-import com.example.pokedexapp.pokemondetail.PokemonDetailViewModel
 import com.example.pokedexapp.util.Resource
 
 class FakePokemonRepository : PokemonRepository{
 private var shouldReturnNetworkError = false
 
+    private val favPokemon = mutableListOf<PokedexListEntry>()
+    private val favPokemonList = mutableListOf<PokedexListEntry>()
+    private val observableFavPokemonList = MutableLiveData<List<PokedexListEntry>>(favPokemonList)
+
     override fun setShouldReturnNetworkError(value: Boolean){
         shouldReturnNetworkError = value
+    }
+
+    private fun refreshLiveData(){
+        observableFavPokemonList.postValue(favPokemon)
     }
 
     override suspend fun getPokemonList(limit: Int, offset: Int): Resource<PokemonList> {
@@ -109,9 +118,21 @@ private var shouldReturnNetworkError = false
     }
 
     override suspend fun insertFavPokemon(pokemon: PokedexListEntry) {
-        TODO("Not yet implemented")
+        favPokemonList.add(pokemon)
+        refreshLiveData()
     }
-    override suspend fun getFavPokemons(pokemonList: PokemonList) {
-        TODO("Not yet implemented")
+
+    override fun observeFavPokemons(): LiveData<List<PokedexListEntry>> {
+        return observableFavPokemonList
+    }
+
+    override suspend fun searchFavPokemons(pokemonName: String): List<PokedexListEntry> {
+        return favPokemonList.filter { pokedexListEntry -> pokedexListEntry.pokemonName == pokemonName }
+    }
+
+
+    override suspend fun deleteFavPokemon(pokemon: PokedexListEntry) {
+        favPokemonList.remove(pokemon)
+        refreshLiveData()
     }
 }
