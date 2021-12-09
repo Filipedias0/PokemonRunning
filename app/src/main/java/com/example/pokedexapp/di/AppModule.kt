@@ -36,6 +36,12 @@ object AppModule {
 
     @Singleton
     @Provides
+    fun provideRunDao(
+        dataBase: PokemonDataBase
+    ) = dataBase.runDao()
+
+    @Singleton
+    @Provides
     fun provideDefaultPokemonRepository(
         api: PokeApi,
         pokemonDao: PokemonDao

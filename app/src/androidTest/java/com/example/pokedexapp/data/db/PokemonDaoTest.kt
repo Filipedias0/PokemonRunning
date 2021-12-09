@@ -1,6 +1,7 @@
-package com.example.pokedexapp.data.local
+package com.example.pokedexapp.data.db
 
 import androidx.arch.core.executor.testing.InstantTaskExecutorRule
+import androidx.test.filters.MediumTest
 import androidx.test.filters.SmallTest
 import com.example.pokedexapp.data.models.PokedexListEntry
 import com.example.pokedexapp.db.PokemonDao
@@ -11,7 +12,6 @@ import dagger.hilt.android.testing.HiltAndroidRule
 import dagger.hilt.android.testing.HiltAndroidTest
 import kotlinx.coroutines.ExperimentalCoroutinesApi
 import kotlinx.coroutines.test.runBlockingTest
-import okhttp3.internal.wait
 import org.junit.After
 import org.junit.Before
 import org.junit.Rule
@@ -20,7 +20,7 @@ import javax.inject.Inject
 import javax.inject.Named
 
 @ExperimentalCoroutinesApi
-@SmallTest
+@MediumTest
 @HiltAndroidTest
 class PokemonDaoTest {
 

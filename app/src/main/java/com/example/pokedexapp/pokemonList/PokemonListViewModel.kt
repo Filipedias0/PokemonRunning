@@ -3,12 +3,14 @@ package com.example.pokedexapp.pokemonList
 import android.graphics.Bitmap
 import android.graphics.drawable.BitmapDrawable
 import android.graphics.drawable.Drawable
+import android.util.Log
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.ui.graphics.Color
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
 import androidx.palette.graphics.Palette
 import com.example.pokedexapp.data.models.PokedexListEntry
+import com.example.pokedexapp.db.RunDAO
 import com.example.pokedexapp.repository.PokemonRepository
 import com.example.pokedexapp.util.Resource
 import com.example.pokedexapp.util.constants.Constants.PAGE_SIZE
@@ -20,7 +22,8 @@ import javax.inject.Inject
 
 @HiltViewModel
 class PokemonListViewModel @Inject constructor(
-    private val repository: PokemonRepository
+    private val repository: PokemonRepository,
+    private val runDAO: RunDAO
 ) : ViewModel() {
 
     private var curPage = 0
@@ -69,6 +72,8 @@ class PokemonListViewModel @Inject constructor(
     }
 
     fun loadPokemonPaginated() {
+        Log.d("runDao", "RUNDAO: ${ runDAO.hashCode()}")
+
         viewModelScope.launch {
             isLoading.value = true
 

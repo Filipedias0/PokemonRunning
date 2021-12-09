@@ -1,5 +1,6 @@
 package com.example.pokedexapp.pokemonList
 
+import android.util.Log
 import androidx.compose.foundation.Image
 import androidx.compose.foundation.background
 import androidx.compose.foundation.clickable
@@ -36,7 +37,6 @@ import com.example.pokedexapp.data.models.PokedexListEntry
 import com.plcoding.jetpackcomposepokedex.ui.theme.RobotoCondensed
 import androidx.compose.material.*
 import androidx.hilt.navigation.compose.hiltViewModel
-
 
 @Composable
 fun PokemonListScreen(
