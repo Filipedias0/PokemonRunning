@@ -23,7 +23,6 @@ import javax.inject.Inject
 @HiltViewModel
 class PokemonListViewModel @Inject constructor(
     private val repository: PokemonRepository,
-    private val runDAO: RunDAO
 ) : ViewModel() {
 
     private var curPage = 0
@@ -72,8 +71,6 @@ class PokemonListViewModel @Inject constructor(
     }
 
     fun loadPokemonPaginated() {
-        Log.d("runDao", "RUNDAO: ${ runDAO.hashCode()}")
-
         viewModelScope.launch {
             isLoading.value = true
 
