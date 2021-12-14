@@ -5,8 +5,11 @@ import androidx.room.Room
 import com.example.pokedexapp.data.remote.PokeApi
 import com.example.pokedexapp.db.PokemonDao
 import com.example.pokedexapp.db.PokemonDataBase
+import com.example.pokedexapp.db.RunDAO
 import com.example.pokedexapp.repository.DefaultPokemonRepository
+import com.example.pokedexapp.repository.DefaultPokemonRunRepository
 import com.example.pokedexapp.repository.PokemonRepository
+import com.example.pokedexapp.repository.PokemonRunRepository
 import com.example.pokedexapp.util.constants.Constants.BASE_URL
 import com.example.pokedexapp.util.constants.Constants.DATABASE_NAME
 import dagger.Module
@@ -46,6 +49,12 @@ object AppModule {
         api: PokeApi,
         pokemonDao: PokemonDao
     ) = DefaultPokemonRepository(pokemonDao,api ) as PokemonRepository
+
+    @Singleton
+    @Provides
+    fun provideDefaultPokemonRunRepository(
+        runDAO: RunDAO
+    ) = DefaultPokemonRunRepository(runDAO) as PokemonRunRepository
 
     @Singleton
     @Provides
