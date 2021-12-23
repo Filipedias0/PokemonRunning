@@ -44,7 +44,7 @@ class PokemonDetailViewModel @Inject constructor(
         }
     }
 
-    suspend fun getIsFavPokemon(pokemonName: String){
+    private suspend fun getIsFavPokemon(pokemonName: String){
         val list = repository.searchFavPokemons(pokemonName)
         list.size
         isFavPokemon.postValue(!list.isNullOrEmpty())
