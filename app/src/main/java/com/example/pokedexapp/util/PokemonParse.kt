@@ -3,8 +3,8 @@ package com.example.pokedexapp.util
 import androidx.compose.ui.graphics.Color
 import com.example.pokedexapp.data.remote.responses.Stat
 import com.example.pokedexapp.data.remote.responses.Type
+import com.example.pokedexapp.ui.theme.*
 import com.plcoding.jetpackcomposepokedex.ui.theme.*
-import com.plcoding.jetpackcomposepokedex.ui.theme.TypeDragon
 import java.util.*
 
 fun parseTypeToColor(type: Type): Color {

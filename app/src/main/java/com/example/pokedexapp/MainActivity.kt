@@ -34,10 +34,13 @@ import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import androidx.navigation.NavHostController
 import androidx.navigation.compose.currentBackStackEntryAsState
+import com.example.pokedexapp.runningSection.welcome.WelcomeScreen
+import com.google.accompanist.permissions.ExperimentalPermissionsApi
 import java.util.*
 
 @AndroidEntryPoint
 class MainActivity : ComponentActivity() {
+    @ExperimentalPermissionsApi
     @ExperimentalMaterialApi
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
@@ -60,7 +63,7 @@ class MainActivity : ComponentActivity() {
                                 ),
                                 BottomNavItem(
                                     name = "Run",
-                                    route = "fav_pokemons_screen",
+                                    route = "welcome_screen",
                                     icon = Icons.Default.Place
                                 )
                             ),
@@ -80,6 +83,7 @@ class MainActivity : ComponentActivity() {
 
 
 
+@ExperimentalPermissionsApi
 @Composable
 fun Navigation(navController: NavHostController){
         NavHost(
@@ -115,6 +119,10 @@ fun Navigation(navController: NavHostController){
             }
             composable("fav_pokemons_screen"){
                 FavPokemonsScreen(navController = navController)
+            }
+
+            composable("welcome_screen"){
+                WelcomeScreen(navController = navController)
             }
         }
 }

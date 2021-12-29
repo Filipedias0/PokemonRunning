@@ -1,4 +1,4 @@
-package com.plcoding.jetpackcomposepokedex.ui.theme
+package com.example.pokedexapp.ui.theme
 
 import androidx.compose.ui.graphics.Color
 
