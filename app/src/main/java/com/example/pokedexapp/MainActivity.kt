@@ -26,6 +26,7 @@ import androidx.navigation.navArgument
 import com.example.pokedexapp.favPokemons.FavPokemonsScreen
 import com.example.pokedexapp.pokemonList.PokemonListScreen
 import com.example.pokedexapp.pokemondetail.PokemonDetailScreen
+import com.example.pokedexapp.runningSection.runsScreen.RunsScreen
 import com.example.pokedexapp.ui.theme.PokedexAppTheme
 import dagger.hilt.android.AndroidEntryPoint
 import androidx.compose.ui.Modifier
@@ -123,6 +124,10 @@ fun Navigation(navController: NavHostController){
 
             composable("welcome_screen"){
                 WelcomeScreen(navController = navController)
+            }
+
+            composable("runs_screen") {
+                RunsScreen(navController = navController)
             }
         }
 }
