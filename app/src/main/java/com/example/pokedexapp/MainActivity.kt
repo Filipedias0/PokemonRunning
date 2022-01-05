@@ -35,6 +35,7 @@ import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import androidx.navigation.NavHostController
 import androidx.navigation.compose.currentBackStackEntryAsState
+import com.example.pokedexapp.runningSection.startRunScreen.StartRunScreen
 import com.example.pokedexapp.runningSection.welcome.WelcomeScreen
 import com.google.accompanist.permissions.ExperimentalPermissionsApi
 import java.util.*
@@ -128,6 +129,10 @@ fun Navigation(navController: NavHostController){
 
             composable("runs_screen") {
                 RunsScreen(navController = navController)
+            }
+
+            composable("start_run_screen") {
+                StartRunScreen(navController = navController)
             }
         }
 }

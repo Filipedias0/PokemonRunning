@@ -30,6 +30,7 @@ import androidx.hilt.navigation.compose.hiltViewModel
 import androidx.navigation.NavController
 import com.example.pokedexapp.R
 import com.example.pokedexapp.favPokemons.FavPokemonsViewModel
+import com.example.pokedexapp.util.PermissionsHandler
 import com.google.accompanist.permissions.ExperimentalPermissionsApi
 import com.google.accompanist.permissions.PermissionsRequired
 import com.google.accompanist.permissions.rememberMultiplePermissionsState
@@ -47,7 +48,7 @@ fun WelcomeScreen(
         color = MaterialTheme.colors.background,
         modifier = Modifier.fillMaxSize()
     ) {
-        handlePermissions(showAlert = showAlert, false)
+        PermissionsHandler(showAlert = showAlert, false)
         RunningWrapper(
             modifier = Modifier
                 .fillMaxSize()
@@ -183,139 +184,4 @@ fun TextInput(
     }
 }
 
-@Composable
-fun PermissionsDialog(
-    title: String?,
-    state: MutableState<Boolean>,
-    onClick: () -> Unit,
-    content: @Composable (() -> Unit)? = null
-) {
-    AlertDialog(
-        onDismissRequest = {
-            state.value = false
-        },
-        title = title?.let {
-            {
-                Column(
-                    Modifier.fillMaxWidth(),
-                    verticalArrangement = Arrangement.spacedBy(8.dp)
-                ) {
-                    Text(text = title)
-                    Divider(modifier = Modifier.padding(bottom = 8.dp))
-                }
-            }
-        },
-        text = content,
-
-        confirmButton = {
-            Button(onClick = onClick) {
-                Text(text = "Ok")
-            }
-        },
-        modifier = Modifier.padding(vertical = 8.dp)
-    )
-}
-
-@RequiresApi(Build.VERSION_CODES.Q)
-@ExperimentalPermissionsApi
-@Composable
-fun handlePermissions(showAlert: MutableState<Boolean>, background: Boolean) {
-
-    val permissions =
-        if (Build.VERSION.SDK_INT < Build.VERSION_CODES.Q || !background) {
-            listOf(
-                Manifest.permission.ACCESS_COARSE_LOCATION,
-                Manifest.permission.ACCESS_FINE_LOCATION
-            )
-        } else {
-            listOf(
-                Manifest.permission.ACCESS_BACKGROUND_LOCATION,
-                Manifest.permission.ACCESS_COARSE_LOCATION,
-                Manifest.permission.ACCESS_FINE_LOCATION
-            )
-        }
-
-
-    val permissionsBack =
-            listOf(
-                Manifest.permission.ACCESS_BACKGROUND_LOCATION,
-                Manifest.permission.ACCESS_COARSE_LOCATION,
-                Manifest.permission.ACCESS_FINE_LOCATION
-            )
-
-
-    val permissionsState = rememberMultiplePermissionsState(
-        permissions = permissions
-    )
-
-    val permissionsBackState = rememberMultiplePermissionsState(
-        permissions = permissionsBack
-    )
-
-    PermissionsRequired(
-        multiplePermissionsState = permissionsState,
-        permissionsNotGrantedContent = {
-            showAlert.value = true
-            PermissionsDialog(
-                state = showAlert,
-                onClick = { permissionsState.launchMultiplePermissionRequest() },
-                title = "Welcome!"
-            ) {
-                Text(
-                    "This app uses permissions for location in background" +
-                            " to track your runs, please enable it to use the app!"
-                )
-            }
-        },
-        permissionsNotAvailableContent = {
-            showAlert.value = true
-            PermissionsDialog(
-                state = showAlert,
-                onClick = { permissionsState.launchMultiplePermissionRequest() },
-                title = "Welcome!"
-            ) {
-                Text(
-                    "This app uses permissions for location in background" +
-                            " to track your runs, please enable \"all the time\" in the settings to use the app!"
-                )
-            }
-
-        }
-
-    ) {
-        if(showAlert.value){
-            PermissionsDialog(
-                state = showAlert,
-                onClick = {
-                    showAlert.value = false
-                    permissionsBackState.launchMultiplePermissionRequest()
-                          },
-                title = "Welcome!"
-            ) {
-                Text(
-                    "This app uses permissions for location in background" +
-                            " to track your runs, please enable \"all the time\" in the settings to use the app!"
-                )
-            }
-        }
-    }
-
-    if(!permissionsBackState.allPermissionsGranted && permissionsState.allPermissionsGranted){
-        showAlert.value = true
-
-        PermissionsDialog(
-            state = showAlert,
-            onClick = {
-                showAlert.value = false
-                permissionsBackState.launchMultiplePermissionRequest()
-            },
-            title = "Welcome!"
-        ) {
-            Text(
-                "This app uses permissions for location in background" +
-                        " to track your runs, please enable \"all the time\" in the settings to use the app!"
-            )
-        }
-    }
-}
 
