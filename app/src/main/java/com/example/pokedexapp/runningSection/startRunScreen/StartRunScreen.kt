@@ -1,5 +1,6 @@
 package com.example.pokedexapp.runningSection.startRunScreen
 
+import android.content.Intent
 import android.os.Build
 import android.os.Bundle
 import androidx.annotation.RequiresApi
@@ -21,6 +22,7 @@ import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import androidx.compose.ui.viewinterop.AndroidView
+import androidx.core.content.ContentProviderCompat.requireContext
 import androidx.hilt.navigation.compose.hiltViewModel
 import androidx.lifecycle.Lifecycle
 import androidx.lifecycle.LifecycleEventObserver
@@ -33,7 +35,11 @@ import com.example.pokedexapp.R
 import com.example.pokedexapp.favPokemons.FavPokemonsViewModel
 import com.example.pokedexapp.util.PermissionsHandler
 import com.google.accompanist.permissions.ExperimentalPermissionsApi
+import com.google.android.libraries.maps.CameraUpdateFactory
 import com.google.android.libraries.maps.MapView
+import com.google.android.libraries.maps.model.LatLng
+import com.google.android.libraries.maps.model.MarkerOptions
+import com.google.android.libraries.maps.model.PolylineOptions
 import com.google.maps.android.ktx.awaitMap
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.Dispatchers
@@ -64,8 +70,7 @@ fun StartRunScreen(
                 )
                 .shadow(10.dp, RoundedCornerShape(10.dp))
                 .clip(RoundedCornerShape(10.dp))
-                .background(MaterialTheme.colors.secondary)
-                .padding(16.dp),
+                .background(MaterialTheme.colors.secondary),
             navController = navController
         )
     }
@@ -85,6 +90,7 @@ fun RunningWrapper(
         verticalArrangement = Arrangement.Top,
         modifier = modifier
     ) {
+        GoogleMap()
 
         var gifLoader = ImageLoader.Builder(LocalContext.current)
             .componentRegistry {
@@ -101,26 +107,24 @@ fun RunningWrapper(
             painter = painter,
             contentDescription = "Pikachu running",
             modifier = Modifier
-                .size(120.dp)
+                .size(90.dp)
                 .align(Alignment.CenterHorizontally)
         )
-
-        GoogleMap()
 
         Text(
             text = "00:00:00",
             fontSize = 48.sp,
             fontWeight = FontWeight.Medium,
-            color = Color(0,103,180)
+            color = Color(0,103,180),
         )
 
         Button(
             modifier = Modifier
-                .fillMaxWidth(0.5f),
+                .fillMaxWidth(0.5f)
+                .offset(
+                    y = 30.dp
+                ),
             onClick = {
-                navController.navigate(
-                    "runs_screen"
-                )
             },
             shape = RoundedCornerShape(20.dp),
             colors = ButtonDefaults.buttonColors(Color(255,203,8))){
@@ -141,7 +145,7 @@ fun GoogleMap(){
     Column(
         modifier = Modifier
             .fillMaxWidth()
-            .fillMaxSize(0.3f)
+            .fillMaxSize(0.5f)
             .background(Color.White)
     ){
         AndroidView(
@@ -149,6 +153,25 @@ fun GoogleMap(){
         ){ mapView ->
             CoroutineScope(Dispatchers.Main).launch {
                 val map = mapView.awaitMap()
+                val pickUp = LatLng(28.7041, 77.1025)
+                val destination = LatLng(12.9716, 77.5946)
+                map.moveCamera(CameraUpdateFactory.newLatLngZoom(destination, 6f))
+                val markerOptions = MarkerOptions()
+                    .title("Delhi")
+                    .position(pickUp)
+                map.addMarker(markerOptions)
+                val markerOptionsDestination = MarkerOptions()
+                    .title("Bangalore")
+                    .position(destination)
+                map.addMarker(markerOptionsDestination)
+                map.addPolyline(
+                    PolylineOptions().add(
+                        pickUp,
+                        LatLng(22.2587, 71.1924),
+                        LatLng(19.7515, 75.7139),
+                        destination
+                    )
+                ).color = R.color.maps_accuracy_circle_fill_color
             }
         }
     }
