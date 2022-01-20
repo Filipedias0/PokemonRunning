@@ -4,6 +4,9 @@ import android.annotation.SuppressLint
 import android.app.*
 import android.content.Context
 import android.content.Intent
+import android.graphics.Bitmap
+import android.graphics.BitmapFactory
+import android.graphics.Color
 import android.os.Build
 import android.os.IBinder
 import android.util.Log
@@ -86,13 +89,18 @@ class MakeItService : Service() {
         with(
             NotificationCompat.Builder(this, NOTIFICATION_CHANNEL_GENERAL)
         ) {
+            val largeIcon = BitmapFactory.decodeResource(resources, R.drawable.poke_ball_pin)
             setTicker(null)
-            setContentTitle("Make it Easy")
-            setContentText("Make it Easy Description")
+            setContentTitle("Pokemon app")
+            setContentText("00:00:00")
             setAutoCancel(false)
             setOngoing(true)
             setWhen(System.currentTimeMillis())
             setSmallIcon(R.drawable.poke_ball_pin)
+            setLargeIcon(largeIcon)
+            color = Color.parseColor("#f7da64")
+            setColorized(true)
+            setStyle(androidx.media.app.NotificationCompat.DecoratedMediaCustomViewStyle())
             priority = Notification.PRIORITY_MAX
             setContentIntent(replyPendingIntent)
             addAction(

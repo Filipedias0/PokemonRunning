@@ -1,5 +1,6 @@
 package com.example.pokedexapp.runningSection.startRunScreen
 
+import android.content.Context
 import android.os.Build
 import android.os.Bundle
 import androidx.annotation.RequiresApi
@@ -31,8 +32,8 @@ import coil.decode.GifDecoder
 import coil.decode.ImageDecoderDecoder
 import com.example.pokedexapp.R
 import com.example.pokedexapp.favPokemons.FavPokemonsViewModel
+import com.example.pokedexapp.runningSection.service.foregroundStartService
 import com.example.pokedexapp.util.PermissionsHandler
-import com.example.pokedexapp.util.foregroundStartService
 import com.google.accompanist.permissions.ExperimentalPermissionsApi
 import com.google.android.libraries.maps.CameraUpdateFactory
 import com.google.android.libraries.maps.MapView
@@ -52,6 +53,7 @@ fun StartRunScreen(
     viewModel: FavPokemonsViewModel = hiltViewModel()
 ) {
     val showAlert = remember { mutableStateOf(false) }
+
 
     Surface(
         color = MaterialTheme.colors.background,
@@ -79,7 +81,7 @@ fun StartRunScreen(
 @Composable
 fun RunningWrapper(
     modifier: Modifier = Modifier,
-    navController: NavController
+    navController: NavController,
 ) {
     var textWeight by rememberSaveable { mutableStateOf("Text") }
     var textName by rememberSaveable { mutableStateOf("Text") }
@@ -90,6 +92,7 @@ fun RunningWrapper(
         modifier = modifier
     ) {
         GoogleMap()
+        val context = LocalContext.current
 
         var gifLoader = ImageLoader.Builder(LocalContext.current)
             .componentRegistry {
@@ -124,7 +127,7 @@ fun RunningWrapper(
                     y = 30.dp
                 ),
             onClick = {
-                      foregroundStartService("Start")
+                foregroundStartService("Start", context)
             },
             shape = RoundedCornerShape(20.dp),
             colors = ButtonDefaults.buttonColors(Color(255,203,8))){
