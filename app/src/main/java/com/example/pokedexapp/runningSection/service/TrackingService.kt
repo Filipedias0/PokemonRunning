@@ -8,11 +8,9 @@ import android.graphics.BitmapFactory
 import android.graphics.Color
 import android.location.Location
 import android.os.Build
-import android.os.IBinder
 import android.os.Looper
 import android.util.Log
 import android.widget.Toast
-import androidx.compose.runtime.mutableStateOf
 import androidx.core.app.NotificationCompat
 import androidx.lifecycle.LifecycleService
 import androidx.lifecycle.MutableLiveData
@@ -20,6 +18,9 @@ import androidx.lifecycle.Observer
 import com.example.pokedexapp.MainActivity
 import com.example.pokedexapp.R
 import com.example.pokedexapp.other.TrackingUtility
+import com.example.pokedexapp.util.constants.Constants.ACTION_PAUSE_SERVICE
+import com.example.pokedexapp.util.constants.Constants.ACTION_START_OR_RESUME_SERVICE
+import com.example.pokedexapp.util.constants.Constants.ACTION_STOP_SERVICE
 import com.google.android.gms.location.LocationCallback
 import com.google.android.gms.location.LocationRequest
 import com.google.android.gms.location.LocationResult
@@ -43,7 +44,7 @@ private const val CODE_ACHIEVE_INTENT = 3
 
 typealias Polyline = MutableList<LatLng>
 typealias Polylines = MutableList<Polyline>
-class MakeItService : LifecycleService() {
+class TrackingService : LifecycleService() {
     private var isFirstRun = true
 
     private val mutabilityFlag = if(Build.VERSION.SDK_INT >= Build.VERSION_CODES.M){
@@ -72,15 +73,23 @@ class MakeItService : LifecycleService() {
     override fun onStartCommand(intent: Intent?, flags: Int, startId: Int): Int {
         super.onStartCommand(intent, flags, startId)
         val command = intent?.getStringExtra(INTENT_COMMAND)
-        if (command == INTENT_COMMAND_EXIT) {
+
+        if(command == ACTION_START_OR_RESUME_SERVICE){
+            if(isFirstRun) {
+                startForegroundService()
+                isFirstRun = false
+            } else {
+                startForegroundService()
+            }
+        }
+
+        if (command == ACTION_STOP_SERVICE) {
             stopService()
             return START_NOT_STICKY
         }
 
-        if(isFirstRun) {
-            showNotification()
-        } else {
-            Timber.d("Resuming service...")
+        if (command == ACTION_PAUSE_SERVICE) {
+            pauseService()
         }
 
         if (command == INTENT_COMMAND_REPLY) {
@@ -98,6 +107,10 @@ class MakeItService : LifecycleService() {
     private fun stopService() {
         stopForeground(true)
         stopSelf()
+    }
+
+    private fun pauseService(){
+        isTracking.postValue(false)
     }
 
     @SuppressLint("MissingPermission")
@@ -143,7 +156,9 @@ class MakeItService : LifecycleService() {
         }
     }
     @SuppressLint("LaunchActivityFromNotification")
-    private fun showNotification() {
+    private fun startForegroundService() {
+        //TODO the color of the background will be the predominant color of the favorite pokemon
+        //TODO the background image will be the favorite pokemon
         addEmptyPolyline()
         isTracking.postValue(true)
 
@@ -153,10 +168,10 @@ class MakeItService : LifecycleService() {
         )
 
         val manager = getSystemService(Context.NOTIFICATION_SERVICE) as NotificationManager
-        val replyIntent = Intent(this, MakeItService::class.java).apply {
+        val replyIntent = Intent(this, TrackingService::class.java).apply {
             putExtra(INTENT_COMMAND, INTENT_COMMAND_REPLY)
         }
-        val achieveIntent = Intent(this, MakeItService::class.java).apply {
+        val achieveIntent = Intent(this, TrackingService::class.java).apply {
             putExtra(INTENT_COMMAND, INTENT_COMMAND_ACHIEVE)
         }
         val replyPendingIntent = PendingIntent.getService(
