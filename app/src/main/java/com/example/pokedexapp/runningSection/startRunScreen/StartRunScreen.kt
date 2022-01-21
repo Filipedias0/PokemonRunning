@@ -44,6 +44,8 @@ import com.google.maps.android.ktx.awaitMap
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.launch
+import com.example.pokedexapp.util.constants.Constants.ACTION_START_OR_RESUME_SERVICE
+import com.example.pokedexapp.util.constants.Constants.ACTION_STOP_SERVICE
 
 @RequiresApi(Build.VERSION_CODES.Q)
 @ExperimentalPermissionsApi
@@ -127,7 +129,7 @@ fun RunningWrapper(
                     y = 30.dp
                 ),
             onClick = {
-                foregroundStartService("Start", context)
+                foregroundStartService(ACTION_START_OR_RESUME_SERVICE, context)
             },
             shape = RoundedCornerShape(20.dp),
             colors = ButtonDefaults.buttonColors(Color(255,203,8))){
