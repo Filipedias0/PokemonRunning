@@ -161,7 +161,7 @@ fun RunningWrapper(
                 modifier = Modifier
                     .fillMaxWidth(0.5f)
                     .offset(
-                        y = 30.dp
+                        y = 40.dp
                     ),
                 onClick = {
                     sendCommandToService(ACTION_START_OR_RESUME_SERVICE, context)
