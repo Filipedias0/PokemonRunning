@@ -46,7 +46,7 @@ typealias Polyline = MutableList<LatLng>
 typealias Polylines = MutableList<Polyline>
 class TrackingService : LifecycleService() {
     private var isFirstRun = true
-
+    private var resuming = false
     private val mutabilityFlag = if(Build.VERSION.SDK_INT >= Build.VERSION_CODES.M){
         PendingIntent.FLAG_IMMUTABLE or PendingIntent.FLAG_UPDATE_CURRENT
     } else {
@@ -60,14 +60,19 @@ class TrackingService : LifecycleService() {
         val pathPoints = MutableLiveData<Polylines>(mutableListOf())
     }
 
+    private fun postInitialValues() {
+        isTracking.postValue(false)
+        pathPoints.postValue(mutableListOf())
+    }
+
     override fun onCreate() {
         super.onCreate()
+        postInitialValues()
         fusedLocationProviderClient = FusedLocationProviderClient(this)
 
         isTracking.observe(this, Observer {
             updateLocationTracking(it)
         })
-
     }
 
     override fun onStartCommand(intent: Intent?, flags: Int, startId: Int): Int {
@@ -76,9 +81,11 @@ class TrackingService : LifecycleService() {
 
         if(command == ACTION_START_OR_RESUME_SERVICE){
             if(isFirstRun) {
+                postInitialValues()
                 startForegroundService()
                 isFirstRun = false
             } else {
+                resuming = true
                 startForegroundService()
             }
         }
@@ -97,16 +104,6 @@ class TrackingService : LifecycleService() {
         }
 
         return START_STICKY
-    }
-
-    private fun addEmptyPolyline() = pathPoints.value?.apply{
-        add(mutableListOf())
-        pathPoints.value = this
-    } ?: pathPoints.postValue(mutableListOf(mutableListOf()))
-
-    private fun stopService() {
-        stopForeground(true)
-        stopSelf()
     }
 
     private fun pauseService(){
@@ -146,20 +143,42 @@ class TrackingService : LifecycleService() {
             }
         }
     }
-    private fun addPathPoint(location: Location?){
+    private fun addPathPoint(location: Location?) {
         location?.let {
             val pos = LatLng(location.latitude, location.longitude)
-            pathPoints.value?.apply {
-                last().add(pos)
-                pathPoints.value = this
+
+            if(pathPoints.value?.isEmpty() == true){
+                pathPoints.postValue(mutableListOf(mutableListOf()))
+            }else {
+                pathPoints.value?.apply {
+                    if (!resuming) {
+                        last().add(pos)
+                        pathPoints.postValue(this)
+                    } else {
+                        add(mutableListOf())
+                        resuming = false
+                        pathPoints.postValue(this)
+
+                    }
+                }
             }
         }
+    }
+
+    private fun addEmptyPolyline() = pathPoints.value?.apply {
+        Timber.d("addEmptyPolyline")
+        add(mutableListOf())
+        pathPoints.postValue(this)
+    } ?: pathPoints.postValue(mutableListOf(mutableListOf()))
+
+    private fun stopService() {
+        stopForeground(true)
+        stopSelf()
     }
     @SuppressLint("LaunchActivityFromNotification")
     private fun startForegroundService() {
         //TODO the color of the background will be the predominant color of the favorite pokemon
         //TODO the background image will be the favorite pokemon
-        addEmptyPolyline()
         isTracking.postValue(true)
 
         val openActivityIntent = Intent(applicationContext, MainActivity::class.java)
@@ -186,7 +205,7 @@ class TrackingService : LifecycleService() {
                 with(
                     NotificationChannel(
                         NOTIFICATION_CHANNEL_GENERAL,
-                        "Make it Easy",
+                        "Pokemon running app",
                         NotificationManager.IMPORTANCE_DEFAULT
                     )
                 ) {

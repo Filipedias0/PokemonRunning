@@ -189,6 +189,7 @@ fun GoogleMap() {
     val lifecycleOwner = LocalLifecycleOwner.current
 
     fun addAllPolylines() {
+        Timber.d("addAllPolylines")
         for (polyline in pathPoints!!) {
             val polylineOptions = PolylineOptions()
                 .color(R.color.colorAccent)
@@ -210,6 +211,7 @@ fun GoogleMap() {
     }
 
     fun addLatestPolyline() {
+        Timber.d("addLatestPolyline")
         //TODO the color of the polyline will be the predominant color of the favorite pokemon
         //TODO make the favorite pokemon run in the map ex
         // val markerOptions = MarkerOptions()
