@@ -4,7 +4,10 @@ import android.os.Bundle
 import androidx.activity.ComponentActivity
 import androidx.activity.compose.setContent
 import androidx.compose.foundation.layout.Column
+import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.size
+import androidx.compose.foundation.layout.width
+import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material.*
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.Favorite
@@ -26,18 +29,24 @@ import androidx.navigation.navArgument
 import com.example.pokedexapp.favPokemons.FavPokemonsScreen
 import com.example.pokedexapp.pokemonList.PokemonListScreen
 import com.example.pokedexapp.pokemondetail.PokemonDetailScreen
+import com.example.pokedexapp.runningSection.runsScreen.RunsScreen
 import com.example.pokedexapp.ui.theme.PokedexAppTheme
 import dagger.hilt.android.AndroidEntryPoint
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.draw.clip
 import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import androidx.navigation.NavHostController
 import androidx.navigation.compose.currentBackStackEntryAsState
+import com.example.pokedexapp.runningSection.startRunScreen.StartRunScreen
+import com.example.pokedexapp.runningSection.welcome.WelcomeScreen
+import com.google.accompanist.permissions.ExperimentalPermissionsApi
 import java.util.*
 
 @AndroidEntryPoint
 class MainActivity : ComponentActivity() {
+    @ExperimentalPermissionsApi
     @ExperimentalMaterialApi
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
@@ -60,7 +69,7 @@ class MainActivity : ComponentActivity() {
                                 ),
                                 BottomNavItem(
                                     name = "Run",
-                                    route = "fav_pokemons_screen",
+                                    route = "welcome_screen",
                                     icon = Icons.Default.Place
                                 )
                             ),
@@ -80,6 +89,7 @@ class MainActivity : ComponentActivity() {
 
 
 
+@ExperimentalPermissionsApi
 @Composable
 fun Navigation(navController: NavHostController){
         NavHost(
@@ -115,6 +125,18 @@ fun Navigation(navController: NavHostController){
             }
             composable("fav_pokemons_screen"){
                 FavPokemonsScreen(navController = navController)
+            }
+
+            composable("welcome_screen"){
+                WelcomeScreen(navController = navController)
+            }
+
+            composable("runs_screen") {
+                RunsScreen(navController = navController)
+            }
+
+            composable("start_run_screen") {
+                StartRunScreen(navController = navController)
             }
         }
 }

@@ -6,19 +6,21 @@ import androidx.compose.material.darkColors
 import androidx.compose.material.lightColors
 import androidx.compose.runtime.Composable
 import androidx.compose.ui.graphics.Color
-import com.plcoding.jetpackcomposepokedex.ui.theme.LightBlue
+import com.example.pokedexapp.ui.theme.LightBlue
 import com.plcoding.jetpackcomposepokedex.ui.theme.Typography
 
 private val DarkColorPalette = darkColors(
     primary = Color.Yellow,
+    secondary = Color(0xFF79A0E7),
     background = Color(0xFF101010),
     onBackground = Color.White,
     surface = Color(0xFF303030),
-    onSurface = Color.White
+    onSurface = Color.White,
 )
 
 private val LightColorPalette = lightColors(
     primary = Color.Blue,
+    secondary = Color(0xFF6495ED),
     background = LightBlue,
     onBackground = Color.Black,
     surface = Color.White,
