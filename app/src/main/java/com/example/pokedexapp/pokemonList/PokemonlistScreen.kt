@@ -219,8 +219,7 @@ fun PokemonList(
         }
         if(loadError.isNotEmpty()){
             RetrySection(error = loadError) {
-                viewModel.loadPokemonPaginated()
-                
+                viewModel.pokemonList.value = viewModel.cachedPokemonList
             }
         }
     }

@@ -36,7 +36,7 @@ class PokemonListViewModel @Inject constructor(
     var isLoading = mutableStateOf(false)
     var endReached = mutableStateOf(false)
 
-    private var cachedPokemonList = listOf<PokedexListEntry>()
+    var cachedPokemonList = listOf<PokedexListEntry>()
     private var isSearchStarting = true
     var isSearching = mutableStateOf(false)
 
@@ -52,25 +52,23 @@ class PokemonListViewModel @Inject constructor(
                 isSearchStarting = true
                 return@launch
             }
-            val response = repository.getPokemonInfo(query.toLowerCase()).let {
+
+            cachedPokemonList = pokemonList.value
+            var response: List<PokedexListEntry>
+            repository.getPokemonInfo(query.toLowerCase()).let {
                 if(it.data == null){
                     loadStatus.value = "Nenhum Pokémon encontrado"
                     pokemonList.value = listOf()
                     isLoading.value = false
                     return@launch
                 }else{
-                    listOf(PokedexListEntry(pokemonName = it.data.name, imageUrl = it.data.sprites.front_default, number = it.data.id))
+                    isSearching.value = false
+                    pokemonList.value = listOf(PokedexListEntry(pokemonName = it.data.name, imageUrl = it.data.sprites.front_default, number = it.data.id))
                 }
             }
 
-            if (isSearchStarting) {
-                cachedPokemonList = pokemonList.value
-                isSearchStarting = false
-            }
-            pokemonList.value = response
-            isSearching.value = false
+            loadStatus.value = ""
             Timber.d("Search");
-
         }
     }
 
