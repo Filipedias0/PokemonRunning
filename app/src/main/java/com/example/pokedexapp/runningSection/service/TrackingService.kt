@@ -28,20 +28,22 @@ import com.google.android.libraries.maps.model.LatLng
 import timber.log.Timber
 import com.example.pokedexapp.util.constants.Constants.FASTEST_LOCATION_INTERVAL
 import com.example.pokedexapp.util.constants.Constants.LOCATION_UPDATE_INTERVAL
+import com.example.pokedexapp.util.constants.Constants.NOTIFICATION_CHANNEL_GENERAL
 import com.example.pokedexapp.util.constants.Constants.TIMER_UPDATE_INTERVAL
 import com.google.android.gms.location.FusedLocationProviderClient
 import com.google.android.gms.location.LocationRequest.PRIORITY_HIGH_ACCURACY
+import dagger.hilt.android.AndroidEntryPoint
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.delay
 import kotlinx.coroutines.launch
+import javax.inject.Inject
 
 const val INTENT_COMMAND = "Command"
 const val INTENT_COMMAND_EXIT = "Exit"
 const val INTENT_COMMAND_REPLY = "Reply"
 const val INTENT_COMMAND_ACHIEVE = "Achieve"
 
-private const val NOTIFICATION_CHANNEL_GENERAL = "Checking"
 private const val CODE_FOREGROUND_SERVICE = 1
 private const val CODE_REPLY_INTENT = 2
 private const val CODE_ACHIEVE_INTENT = 3
@@ -49,19 +51,19 @@ private const val CODE_ACHIEVE_INTENT = 3
 
 typealias Polyline = MutableList<LatLng>
 typealias Polylines = MutableList<Polyline>
+
+@AndroidEntryPoint
 class TrackingService : LifecycleService() {
     private var isFirstRun = true
     private var resuming = false
-    private val mutabilityFlag = if(Build.VERSION.SDK_INT >= Build.VERSION_CODES.M){
-        PendingIntent.FLAG_IMMUTABLE or PendingIntent.FLAG_UPDATE_CURRENT
-    } else {
-        PendingIntent.FLAG_UPDATE_CURRENT
-    }
 
-    private lateinit var  fusedLocationProviderClient: FusedLocationProviderClient
+    @Inject
+    lateinit var  fusedLocationProviderClient: FusedLocationProviderClient
     
     private val timeRunInSeconds = MutableLiveData<Long>()
 
+    @Inject
+    lateinit var baseNotificationBuilder: NotificationCompat.Builder
     companion object{
         val timeRunInMillis = MutableLiveData<Long>()
         var isTracking = MutableLiveData(false)
@@ -220,11 +222,6 @@ class TrackingService : LifecycleService() {
         startTimer()
         isTracking.postValue(true)
 
-        val openActivityIntent = Intent(applicationContext, MainActivity::class.java)
-        val openActivityPendingIntent = PendingIntent.getActivity(
-            applicationContext, 0, openActivityIntent, mutabilityFlag
-        )
-
         val manager = getSystemService(Context.NOTIFICATION_SERVICE) as NotificationManager
         val replyIntent = Intent(this, TrackingService::class.java).apply {
             putExtra(INTENT_COMMAND, INTENT_COMMAND_REPLY)
@@ -260,30 +257,7 @@ class TrackingService : LifecycleService() {
             }
         }
 
-        with(
-            NotificationCompat.Builder(this, NOTIFICATION_CHANNEL_GENERAL)
-        ) {
-            val largeIcon = BitmapFactory.decodeResource(resources, R.drawable.poke_ball_pin)
-            setTicker(null)
-            setContentTitle("Pokemon app")
-            setContentText("00:00:00")
-            setAutoCancel(false)
-            setOngoing(true)
-            setWhen(System.currentTimeMillis())
-            setSmallIcon(R.drawable.poke_ball_pin)
-            setLargeIcon(largeIcon)
-            color = Color.parseColor("#f7da64")
-            setColorized(true)
-            setStyle(androidx.media.app.NotificationCompat.DecoratedMediaCustomViewStyle())
-            priority = Notification.PRIORITY_MAX
-            setContentIntent(openActivityPendingIntent)
-            addAction(
-                0, "REPLY", replyPendingIntent
-            )
-            addAction(
-                0, "ACHIEVE", replyPendingIntent
-            )
-            startForeground(CODE_FOREGROUND_SERVICE, build())
+            startForeground(CODE_FOREGROUND_SERVICE, baseNotificationBuilder.build())
         }
     }
-}
+
