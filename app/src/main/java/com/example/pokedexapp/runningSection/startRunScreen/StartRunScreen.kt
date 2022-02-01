@@ -27,6 +27,7 @@ import androidx.compose.ui.viewinterop.AndroidView
 import androidx.hilt.navigation.compose.hiltViewModel
 import androidx.lifecycle.Lifecycle
 import androidx.lifecycle.LifecycleEventObserver
+import androidx.lifecycle.LifecycleOwner
 import androidx.lifecycle.Observer
 import androidx.navigation.NavController
 import coil.ImageLoader
@@ -35,6 +36,7 @@ import coil.decode.GifDecoder
 import coil.decode.ImageDecoderDecoder
 import com.example.pokedexapp.R
 import com.example.pokedexapp.favPokemons.FavPokemonsViewModel
+import com.example.pokedexapp.other.TrackingUtility
 import com.example.pokedexapp.runningSection.service.Polyline
 import com.example.pokedexapp.runningSection.service.TrackingService
 import com.example.pokedexapp.runningSection.service.sendCommandToService
@@ -93,6 +95,9 @@ fun RunningWrapper(
 ) {
     val isTracking by TrackingService.isTracking.observeAsState(false)
     lateinit var context: Context
+    var curTimeInMillis = 0L
+    val lifecycleOwner = LocalLifecycleOwner.current
+    var textTimer by remember { mutableStateOf("00:00:00") }
 
     fun toggleRun(){
         if(isTracking){
@@ -102,12 +107,21 @@ fun RunningWrapper(
         }
     }
 
+    fun subscribeToObservers() {
+        TrackingService.timeRunInMillis.observe(lifecycleOwner, Observer {
+            curTimeInMillis = it
+            val formattedTime = TrackingUtility.getFormattedStopWatchTime(curTimeInMillis, true)
+            textTimer = formattedTime
+        })
+    }
+
     Column(
         horizontalAlignment = Alignment.CenterHorizontally,
         verticalArrangement = Arrangement.Top,
         modifier = modifier
     ) {
         GoogleMap()
+        subscribeToObservers()
         context = LocalContext.current
 
         var gifLoader = ImageLoader.Builder(LocalContext.current)
@@ -130,7 +144,7 @@ fun RunningWrapper(
         )
 
         Text(
-            text = "00:00:00",
+            text = textTimer,
             fontSize = 48.sp,
             fontWeight = FontWeight.Medium,
             color = Color(0, 103, 180),

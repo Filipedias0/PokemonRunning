@@ -6,6 +6,7 @@ import android.os.Build
 import com.example.pokedexapp.util.constants.Constants.ACTION_PAUSE_SERVICE
 import com.example.pokedexapp.util.constants.Constants.ACTION_START_OR_RESUME_SERVICE
 import com.example.pokedexapp.util.constants.Constants.ACTION_STOP_SERVICE
+import java.util.concurrent.TimeUnit
 
 fun sendCommandToService(command: String, context: Context) {
     val intent = Intent(context, TrackingService::class.java)
