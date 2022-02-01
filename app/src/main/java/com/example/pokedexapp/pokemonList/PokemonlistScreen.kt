@@ -264,7 +264,7 @@ fun RetrySection(
         Button(
             onClick = { onRetry() }, modifier = Modifier.align(CenterHorizontally)
         ){
-            Text(text = "Retry")
+            Text(text = "Reload")
         }
     }
 }
