@@ -51,6 +51,7 @@ import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.launch
 import com.example.pokedexapp.util.constants.Constants.ACTION_START_OR_RESUME_SERVICE
+import com.example.pokedexapp.util.constants.Constants.ACTION_STOP_SERVICE
 import com.example.pokedexapp.util.constants.Constants.MAP_ZOOM
 import com.example.pokedexapp.util.constants.Constants.POLYLINE_WIDTH
 import com.google.android.libraries.maps.GoogleMap
@@ -63,13 +64,25 @@ fun StartRunScreen(
     navController: NavController,
     viewModel: FavPokemonsViewModel = hiltViewModel()
 ) {
-    val showAlert = remember { mutableStateOf(false) }
+    val showPermissionsDialog = remember { mutableStateOf(false) }
+    val showFinishRunDialog = remember { mutableStateOf(false) }
+    var textTimer = remember { mutableStateOf("00:00:00") }
 
     Surface(
         color = MaterialTheme.colors.background,
         modifier = Modifier.fillMaxSize()
     ) {
-        PermissionsHandler(showAlert = showAlert, false)
+        PermissionsHandler(showAlert = showPermissionsDialog, false)
+
+        if(showFinishRunDialog.value){
+            FinishRunDialog(
+                showAlert = showFinishRunDialog,
+                context = LocalContext.current,
+                navController = navController,
+                textTimer = textTimer
+            )
+        }
+
         RunningWrapper(
             modifier = Modifier
                 .fillMaxSize()
@@ -82,8 +95,10 @@ fun StartRunScreen(
                 .shadow(10.dp, RoundedCornerShape(10.dp))
                 .clip(RoundedCornerShape(10.dp))
                 .background(MaterialTheme.colors.secondary),
-            navController = navController
-        )
+            navController = navController,
+            showFinishRunDialog =   showFinishRunDialog,
+            textTimer = textTimer
+            )
     }
 
 }
@@ -92,12 +107,13 @@ fun StartRunScreen(
 fun RunningWrapper(
     modifier: Modifier = Modifier,
     navController: NavController,
-) {
+    showFinishRunDialog: MutableState<Boolean>,
+    textTimer: MutableState<String>
+    ) {
     val isTracking by TrackingService.isTracking.observeAsState(false)
     lateinit var context: Context
     var curTimeInMillis = 0L
     val lifecycleOwner = LocalLifecycleOwner.current
-    var textTimer by remember { mutableStateOf("00:00:00") }
 
     fun toggleRun(){
         if(isTracking){
@@ -111,7 +127,7 @@ fun RunningWrapper(
         TrackingService.timeRunInMillis.observe(lifecycleOwner, Observer {
             curTimeInMillis = it
             val formattedTime = TrackingUtility.getFormattedStopWatchTime(curTimeInMillis, true)
-            textTimer = formattedTime
+            textTimer.value = formattedTime
         })
     }
 
@@ -144,7 +160,7 @@ fun RunningWrapper(
         )
 
         Text(
-            text = textTimer,
+            text = textTimer.value,
             fontSize = 48.sp,
             fontWeight = FontWeight.Medium,
             color = Color(0, 103, 180),
@@ -178,7 +194,7 @@ fun RunningWrapper(
                         y = 40.dp
                     ),
                 onClick = {
-                    sendCommandToService(ACTION_START_OR_RESUME_SERVICE, context)
+                    showFinishRunDialog.value = true
                 },
                 shape = RoundedCornerShape(20.dp),
                 colors = ButtonDefaults.buttonColors(Color(255, 203, 8))
@@ -303,6 +319,57 @@ fun rememberMapLifecycleObserver(mapView: MapView): LifecycleEventObserver =
             }
         }
     }
+
+@Composable
+fun FinishRunDialog(
+    showAlert: MutableState<Boolean>,
+    context: Context,
+    navController: NavController,
+    textTimer: MutableState<String>
+) {
+    val title = "Finish run"
+
+    fun cancelRun(){
+        sendCommandToService(context = context, command = ACTION_STOP_SERVICE)
+        textTimer.value = "00:00:00:00"
+        navController.navigate(
+            "runs_screen"
+        )
+    }
+    AlertDialog(
+        onDismissRequest = {
+            showAlert.value = false
+        },
+        title = title.let {
+            {
+                Column(
+                    Modifier.fillMaxWidth(),
+                    verticalArrangement = Arrangement.spacedBy(8.dp)
+                ) {
+                    Text(text = title)
+                    Divider(modifier = Modifier.padding(bottom = 8.dp))
+                }
+            }
+        },
+        text = {Text(text = "Dismiss to cancel")},
+
+        confirmButton = {
+            Button(onClick = {  }) {
+                Text(text = "Finish")
+            }
+        },
+
+        dismissButton = {
+            Button(onClick = {
+                cancelRun()
+            }) {
+                Text(text = "Cancel run")
+            }
+        },
+
+        modifier = Modifier.padding(vertical = 8.dp)
+    )
+}
 
 
 

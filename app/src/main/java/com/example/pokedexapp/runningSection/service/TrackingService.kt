@@ -2,15 +2,19 @@ package com.example.pokedexapp.runningSection.service
 
 import android.annotation.SuppressLint
 import android.app.*
+import android.app.PendingIntent.FLAG_UPDATE_CURRENT
 import android.content.Context
 import android.content.Intent
 import android.graphics.BitmapFactory
 import android.graphics.Color
+import android.graphics.drawable.Icon
 import android.location.Location
 import android.os.Build
 import android.os.Looper
 import android.util.Log
 import android.widget.Toast
+import androidx.compose.material.icons.Icons
+import androidx.compose.material.icons.filled.PlayArrow
 import androidx.core.app.NotificationCompat
 import androidx.lifecycle.LifecycleService
 import androidx.lifecycle.MutableLiveData
@@ -29,6 +33,7 @@ import timber.log.Timber
 import com.example.pokedexapp.util.constants.Constants.FASTEST_LOCATION_INTERVAL
 import com.example.pokedexapp.util.constants.Constants.LOCATION_UPDATE_INTERVAL
 import com.example.pokedexapp.util.constants.Constants.NOTIFICATION_CHANNEL_GENERAL
+import com.example.pokedexapp.util.constants.Constants.NOTIFICATION_ID
 import com.example.pokedexapp.util.constants.Constants.TIMER_UPDATE_INTERVAL
 import com.google.android.gms.location.FusedLocationProviderClient
 import com.google.android.gms.location.LocationRequest.PRIORITY_HIGH_ACCURACY
@@ -56,6 +61,7 @@ typealias Polylines = MutableList<Polyline>
 class TrackingService : LifecycleService() {
     private var isFirstRun = true
     private var resuming = false
+    private var serviceKilled = false
 
     @Inject
     lateinit var  fusedLocationProviderClient: FusedLocationProviderClient
@@ -64,6 +70,9 @@ class TrackingService : LifecycleService() {
 
     @Inject
     lateinit var baseNotificationBuilder: NotificationCompat.Builder
+
+    lateinit var curNoticationBuilder: NotificationCompat.Builder
+
     companion object{
         val timeRunInMillis = MutableLiveData<Long>()
         var isTracking = MutableLiveData(false)
@@ -77,13 +86,24 @@ class TrackingService : LifecycleService() {
         timeRunInMillis.postValue(0L)
     }
 
+    private fun killService(){
+        serviceKilled = true
+        isFirstRun = true
+        pauseService()
+        postInitialValues()
+        stopForeground(true)
+        stopSelf()
+    }
+
     override fun onCreate() {
         super.onCreate()
+        curNoticationBuilder = baseNotificationBuilder
         postInitialValues()
         fusedLocationProviderClient = FusedLocationProviderClient(this)
 
         isTracking.observe(this, Observer {
             updateLocationTracking(it)
+            updateNotificationTrackingState(it)
         })
     }
 
@@ -103,7 +123,7 @@ class TrackingService : LifecycleService() {
         }
 
         if (command == ACTION_STOP_SERVICE) {
-            stopService()
+            killService()
             return START_NOT_STICKY
         }
 
@@ -148,6 +168,34 @@ class TrackingService : LifecycleService() {
     private fun pauseService(){
         isTracking.postValue(false)
         isTimerEnabled = false
+    }
+
+    private fun updateNotificationTrackingState(isTracking: Boolean){
+        val notificationActionText = if(isTracking) "Pause" else "Resume"
+        val pendingIntent = if(isTracking){
+            val pauseIntent = Intent(this, TrackingService::class.java).apply {
+                putExtra(INTENT_COMMAND, ACTION_PAUSE_SERVICE)
+            }
+            PendingIntent.getService(this, 1, pauseIntent, FLAG_UPDATE_CURRENT)
+        }
+        else{
+            val resumeIntent = Intent(this, TrackingService::class.java).apply {
+                putExtra(INTENT_COMMAND, ACTION_START_OR_RESUME_SERVICE)
+            }
+            PendingIntent.getService(this,2,resumeIntent, FLAG_UPDATE_CURRENT)
+        }
+
+        val notificationManager = getSystemService(Context.NOTIFICATION_SERVICE) as NotificationManager
+
+        curNoticationBuilder.javaClass.getDeclaredField("mActions").apply {
+            isAccessible = true
+            set(curNoticationBuilder, ArrayList<NotificationCompat.Action>())
+        }
+        if(!serviceKilled){
+            curNoticationBuilder = baseNotificationBuilder
+                .addAction(R.drawable.ic_pause_black_24dp, notificationActionText, pendingIntent)
+            notificationManager.notify(NOTIFICATION_ID, curNoticationBuilder.build())
+        }
     }
 
     @SuppressLint("MissingPermission")
@@ -211,10 +259,6 @@ class TrackingService : LifecycleService() {
         pathPoints.postValue(this)
     } ?: pathPoints.postValue(mutableListOf(mutableListOf()))
 
-    private fun stopService() {
-        stopForeground(true)
-        stopSelf()
-    }
     @SuppressLint("LaunchActivityFromNotification")
     private fun startForegroundService() {
         //TODO the color of the background will be the predominant color of the favorite pokemon
@@ -222,19 +266,7 @@ class TrackingService : LifecycleService() {
         startTimer()
         isTracking.postValue(true)
 
-        val manager = getSystemService(Context.NOTIFICATION_SERVICE) as NotificationManager
-        val replyIntent = Intent(this, TrackingService::class.java).apply {
-            putExtra(INTENT_COMMAND, INTENT_COMMAND_REPLY)
-        }
-        val achieveIntent = Intent(this, TrackingService::class.java).apply {
-            putExtra(INTENT_COMMAND, INTENT_COMMAND_ACHIEVE)
-        }
-        val replyPendingIntent = PendingIntent.getService(
-            this, CODE_REPLY_INTENT, replyIntent, 0
-        )
-        val achievePendingIntent = PendingIntent.getService(
-            this, CODE_ACHIEVE_INTENT, achieveIntent, 0
-        )
+        val notificationManager = getSystemService(Context.NOTIFICATION_SERVICE) as NotificationManager
 
         if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.O) {
             try {
@@ -250,7 +282,7 @@ class TrackingService : LifecycleService() {
                     enableVibration(false)
                     setSound(null, null)
                     lockscreenVisibility = Notification.VISIBILITY_PUBLIC
-                    manager.createNotificationChannel(this)
+                    notificationManager.createNotificationChannel(this)
                 }
             } catch (e: Exception) {
                 Log.d("Error", "showNotification: ${e.localizedMessage}")
@@ -258,6 +290,14 @@ class TrackingService : LifecycleService() {
         }
 
             startForeground(CODE_FOREGROUND_SERVICE, baseNotificationBuilder.build())
+
+            timeRunInSeconds.observe(this, Observer {
+                if(!serviceKilled){
+                    val notification = curNoticationBuilder
+                        .setContentText(TrackingUtility.getFormattedStopWatchTime(it * 1000L))
+                    notificationManager.notify(NOTIFICATION_ID, notification.build())
+                }
+            })
         }
     }
 

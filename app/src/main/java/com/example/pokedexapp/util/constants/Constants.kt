@@ -25,4 +25,6 @@ object Constants {
     const val TIMER_UPDATE_INTERVAL = 50L
 
     const val NOTIFICATION_CHANNEL_GENERAL = "Checking"
+
+    const val NOTIFICATION_ID = 1
 }
