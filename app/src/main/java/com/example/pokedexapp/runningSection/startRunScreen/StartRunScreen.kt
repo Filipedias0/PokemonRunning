@@ -55,6 +55,7 @@ import com.example.pokedexapp.util.constants.Constants.ACTION_STOP_SERVICE
 import com.example.pokedexapp.util.constants.Constants.MAP_ZOOM
 import com.example.pokedexapp.util.constants.Constants.POLYLINE_WIDTH
 import com.google.android.libraries.maps.GoogleMap
+import com.google.android.libraries.maps.model.LatLngBounds
 import timber.log.Timber
 
 @RequiresApi(Build.VERSION_CODES.Q)
@@ -218,6 +219,33 @@ fun GoogleMap() {
 
     val lifecycleOwner = LocalLifecycleOwner.current
 
+    fun zoomToSeeWholeTrack(){
+        val bounds = LatLngBounds.Builder()
+        for(polyline in pathPoints!!){
+            for(pos in polyline) {
+                bounds.include(pos)
+            }
+        }
+        map?.moveCamera(
+            CameraUpdateFactory.newLatLngBounds(
+                bounds.build(),
+                mapView.width,
+                mapView.height,
+                (mapView.height * 0.05F).toInt()
+            )
+        )
+    }
+
+    fun endRunAndSaveToDb(){
+        map?.snapshot { bmp ->
+            var distanceInMeters = 0
+            for(polyline in pathPoints!!){
+                distanceInMeters += TrackingUtility.calculatePolylineLenght(polyline).toInt()
+            }
+            val avgSpeed = (distanceInMeters / 1000f) / (curTimeInMillis/100)
+        }
+    }
+    
     fun addAllPolylines() {
         Timber.d("addAllPolylines")
         for (polyline in pathPoints!!) {
