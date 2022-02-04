@@ -1,5 +1,7 @@
 package com.example.pokedexapp.util.constants
 
+import android.graphics.Color
+
 object Constants {
 
     const val BASE_URL = "https://pokeapi.co/api/v2/"
@@ -27,4 +29,7 @@ object Constants {
     const val NOTIFICATION_CHANNEL_GENERAL = "Checking"
 
     const val NOTIFICATION_ID = 1
+
+    const val POLYLINE_COLOR = Color.RED
+
 }

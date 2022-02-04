@@ -65,7 +65,7 @@ class TrackingService : LifecycleService() {
 
     @Inject
     lateinit var  fusedLocationProviderClient: FusedLocationProviderClient
-    
+
     private val timeRunInSeconds = MutableLiveData<Long>()
 
     @Inject
@@ -77,6 +77,7 @@ class TrackingService : LifecycleService() {
         val timeRunInMillis = MutableLiveData<Long>()
         var isTracking = MutableLiveData(false)
         val pathPoints = MutableLiveData<Polylines>(mutableListOf())
+        val endRunAndSaveIntoDb = MutableLiveData(false)
     }
 
     private fun postInitialValues() {

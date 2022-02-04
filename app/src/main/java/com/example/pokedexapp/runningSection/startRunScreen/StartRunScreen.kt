@@ -3,7 +3,8 @@ package com.example.pokedexapp.runningSection.startRunScreen
 import android.content.Context
 import android.os.Build
 import android.os.Bundle
-import android.util.Log
+import android.widget.Toast
+import android.widget.Toast.LENGTH_SHORT
 import androidx.annotation.RequiresApi
 import androidx.compose.foundation.Image
 import androidx.compose.foundation.background
@@ -12,7 +13,6 @@ import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material.*
 import androidx.compose.runtime.*
 import androidx.compose.runtime.livedata.observeAsState
-import androidx.compose.runtime.saveable.rememberSaveable
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
@@ -27,7 +27,6 @@ import androidx.compose.ui.viewinterop.AndroidView
 import androidx.hilt.navigation.compose.hiltViewModel
 import androidx.lifecycle.Lifecycle
 import androidx.lifecycle.LifecycleEventObserver
-import androidx.lifecycle.LifecycleOwner
 import androidx.lifecycle.Observer
 import androidx.navigation.NavController
 import coil.ImageLoader
@@ -35,9 +34,8 @@ import coil.compose.rememberImagePainter
 import coil.decode.GifDecoder
 import coil.decode.ImageDecoderDecoder
 import com.example.pokedexapp.R
-import com.example.pokedexapp.favPokemons.FavPokemonsViewModel
+import com.example.pokedexapp.db.Run
 import com.example.pokedexapp.other.TrackingUtility
-import com.example.pokedexapp.runningSection.service.Polyline
 import com.example.pokedexapp.runningSection.service.TrackingService
 import com.example.pokedexapp.runningSection.service.sendCommandToService
 import com.example.pokedexapp.util.PermissionsHandler
@@ -53,27 +51,59 @@ import kotlinx.coroutines.launch
 import com.example.pokedexapp.util.constants.Constants.ACTION_START_OR_RESUME_SERVICE
 import com.example.pokedexapp.util.constants.Constants.ACTION_STOP_SERVICE
 import com.example.pokedexapp.util.constants.Constants.MAP_ZOOM
+import com.example.pokedexapp.util.constants.Constants.POLYLINE_COLOR
 import com.example.pokedexapp.util.constants.Constants.POLYLINE_WIDTH
 import com.google.android.libraries.maps.GoogleMap
 import com.google.android.libraries.maps.model.LatLngBounds
 import timber.log.Timber
+import java.util.*
+import kotlin.math.round
 
 @RequiresApi(Build.VERSION_CODES.Q)
 @ExperimentalPermissionsApi
 @Composable
 fun StartRunScreen(
     navController: NavController,
-    viewModel: FavPokemonsViewModel = hiltViewModel()
+    viewModel: StartRunViewModel = hiltViewModel()
 ) {
     val showPermissionsDialog = remember { mutableStateOf(false) }
     val showFinishRunDialog = remember { mutableStateOf(false) }
     var textTimer = remember { mutableStateOf("00:00:00") }
+    val lifecycleOwner = LocalLifecycleOwner.current
+    var curTimeInMillis = 0L
+    val context = LocalContext.current
+
+    fun cancelRun(){
+        sendCommandToService(context = context, command = ACTION_STOP_SERVICE)
+        textTimer.value = "00:00:00:00"
+        navController.navigate(
+            "runs_screen"
+        )
+    }
+
+    fun subscribeToObservers() {
+        TrackingService.timeRunInMillis.observe(lifecycleOwner, {
+            curTimeInMillis = it
+            val formattedTime = TrackingUtility.getFormattedStopWatchTime(curTimeInMillis, true)
+            textTimer.value = formattedTime
+        })
+
+        StartRunViewModel.saveRun.observe(lifecycleOwner){
+            viewModel.insertRun(it)
+            textTimer.value = "00:00:00:00"
+
+            navController.navigate(
+                "runs_screen"
+            )
+        }
+    }
 
     Surface(
         color = MaterialTheme.colors.background,
         modifier = Modifier.fillMaxSize()
     ) {
         PermissionsHandler(showAlert = showPermissionsDialog, false)
+        subscribeToObservers()
 
         if(showFinishRunDialog.value){
             FinishRunDialog(
@@ -98,8 +128,11 @@ fun StartRunScreen(
                 .background(MaterialTheme.colors.secondary),
             navController = navController,
             showFinishRunDialog =   showFinishRunDialog,
-            textTimer = textTimer
-            )
+            textTimer = textTimer,
+            curTimeInMillis = curTimeInMillis,
+            viewModel = viewModel,
+            cancelRun = { cancelRun() }
+        )
     }
 
 }
@@ -109,12 +142,17 @@ fun RunningWrapper(
     modifier: Modifier = Modifier,
     navController: NavController,
     showFinishRunDialog: MutableState<Boolean>,
-    textTimer: MutableState<String>
+    textTimer: MutableState<String>,
+    curTimeInMillis: Long,
+    viewModel: StartRunViewModel,
+    cancelRun: () -> Unit,
     ) {
     val isTracking by TrackingService.isTracking.observeAsState(false)
     lateinit var context: Context
-    var curTimeInMillis = 0L
     val lifecycleOwner = LocalLifecycleOwner.current
+    val pathPoints by TrackingService.pathPoints.observeAsState()
+    val mapView = rememberMapViewWithLifeCycle()
+    val weight = 80f
 
     fun toggleRun(){
         if(isTracking){
@@ -124,21 +162,12 @@ fun RunningWrapper(
         }
     }
 
-    fun subscribeToObservers() {
-        TrackingService.timeRunInMillis.observe(lifecycleOwner, Observer {
-            curTimeInMillis = it
-            val formattedTime = TrackingUtility.getFormattedStopWatchTime(curTimeInMillis, true)
-            textTimer.value = formattedTime
-        })
-    }
-
     Column(
         horizontalAlignment = Alignment.CenterHorizontally,
         verticalArrangement = Arrangement.Top,
         modifier = modifier
     ) {
-        GoogleMap()
-        subscribeToObservers()
+        MapHandler()
         context = LocalContext.current
 
         var gifLoader = ImageLoader.Builder(LocalContext.current)
@@ -212,12 +241,15 @@ fun RunningWrapper(
 }
 
 @Composable
-fun GoogleMap() {
+fun MapHandler() {
     val mapView = rememberMapViewWithLifeCycle()
     var map: GoogleMap? = null
     val pathPoints by TrackingService.pathPoints.observeAsState()
-
     val lifecycleOwner = LocalLifecycleOwner.current
+    val weight = 80f
+    val context = LocalContext.current
+    var curTimeInMillis = 0L
+
 
     fun zoomToSeeWholeTrack(){
         val bounds = LatLngBounds.Builder()
@@ -236,21 +268,36 @@ fun GoogleMap() {
         )
     }
 
+    fun cancelRun(){
+        sendCommandToService(context = context, command = ACTION_STOP_SERVICE)
+    }
+
     fun endRunAndSaveToDb(){
         map?.snapshot { bmp ->
             var distanceInMeters = 0
             for(polyline in pathPoints!!){
                 distanceInMeters += TrackingUtility.calculatePolylineLenght(polyline).toInt()
             }
-            val avgSpeed = (distanceInMeters / 1000f) / (curTimeInMillis/100)
+            val avgSpeed = round(
+                (distanceInMeters / 1000f) / ( curTimeInMillis/ 1000f / 60 / 60)*10
+            ) / 10f
+            val dateTimeStamp = Calendar.getInstance().timeInMillis
+            val caloriesBurned = ((distanceInMeters /1000f) * weight) .toInt()
+            val run = Run( bmp, dateTimeStamp, avgSpeed, distanceInMeters, curTimeInMillis, caloriesBurned)
+
+            StartRunViewModel.saveRun.postValue(run)
+            Toast.makeText(
+                context, "Run saved succesfully!", LENGTH_SHORT
+            ).show()
+            cancelRun()
         }
     }
-    
+
     fun addAllPolylines() {
         Timber.d("addAllPolylines")
         for (polyline in pathPoints!!) {
             val polylineOptions = PolylineOptions()
-                .color(R.color.colorAccent)
+                .color(POLYLINE_COLOR)
                 .width(POLYLINE_WIDTH)
                 .addAll(polyline)
             map?.addPolyline(polylineOptions)
@@ -280,7 +327,7 @@ fun GoogleMap() {
             val preLastLatLng = pathPoints!!.last()[pathPoints!!.last().size - 2]
             val lastLatLng = pathPoints!!.last().last()
             val polylineOptions = PolylineOptions()
-                .color(R.color.blue)
+                .color(POLYLINE_COLOR)
                 .width(POLYLINE_WIDTH)
                 .add(preLastLatLng)
                 .add(lastLatLng)
@@ -292,6 +339,17 @@ fun GoogleMap() {
         TrackingService.pathPoints.observe(lifecycleOwner, {
             addLatestPolyline()
             moveCameraToUser()
+        })
+
+        TrackingService.endRunAndSaveIntoDb.observe(lifecycleOwner){
+            if(it) {
+                zoomToSeeWholeTrack()
+                endRunAndSaveToDb()
+            }
+        }
+
+        TrackingService.timeRunInMillis.observe(lifecycleOwner, Observer {
+            curTimeInMillis = it
         })
     }
 
@@ -382,7 +440,10 @@ fun FinishRunDialog(
         text = {Text(text = "Dismiss to cancel")},
 
         confirmButton = {
-            Button(onClick = {  }) {
+            Button(onClick = {
+                TrackingService.endRunAndSaveIntoDb.postValue(true)
+                showAlert.value = false
+            }) {
                 Text(text = "Finish")
             }
         },
@@ -390,6 +451,7 @@ fun FinishRunDialog(
         dismissButton = {
             Button(onClick = {
                 cancelRun()
+                showAlert.value = false
             }) {
                 Text(text = "Cancel run")
             }
@@ -398,7 +460,6 @@ fun FinishRunDialog(
         modifier = Modifier.padding(vertical = 8.dp)
     )
 }
-
 
 
 
