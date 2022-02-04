@@ -1,6 +1,7 @@
 package com.example.pokedexapp.repository
 
 import androidx.lifecycle.LiveData
+import com.example.pokedexapp.data.models.PokedexListEntry
 import com.example.pokedexapp.db.Run
 import com.example.pokedexapp.db.RunDAO
 import javax.inject.Inject
@@ -17,35 +18,35 @@ class DefaultPokemonRunRepository @Inject constructor(
         return runDAO.deleteRun(run)
     }
 
-    override suspend fun getAllRunsSortedByDate(): LiveData<List<Run>> {
+    override fun getAllRunsSortedByDate(): LiveData<List<Run>> {
         return runDAO.getAllRunsSortedByDate()
     }
 
-    override suspend fun getAllRunsSortedByTimeInMillis(): LiveData<List<Run>> {
+    override fun getAllRunsSortedByTimeInMillis(): LiveData<List<Run>> {
         return runDAO.getAllRunsSortedByTimeInMillis()
     }
 
-    override suspend fun getAllRunsSortedByAvgSpeed(): LiveData<List<Run>> {
+    override fun getAllRunsSortedByAvgSpeed(): LiveData<List<Run>> {
         return runDAO.getAllRunsSortedByAvgSpeed()
     }
 
-    override suspend fun getAllRunsSortedByDistance(): LiveData<List<Run>> {
+    override fun getAllRunsSortedByDistance(): LiveData<List<Run>> {
         return runDAO.getAllRunsSortedByDistance()
     }
 
-    override suspend fun getTotalTimeInMillis(): LiveData<Long> {
+    override fun getTotalTimeInMillis(): LiveData<Long> {
         return runDAO.getTotalTimeInMillis()
     }
 
-    override suspend fun getTotalCaloriesBurned(): LiveData<Int> {
+    override fun getTotalCaloriesBurned(): LiveData<Int> {
         return runDAO.getTotalCaloriesBurned()
     }
 
-    override suspend fun getTotalDistance(): LiveData<Int> {
+    override fun getTotalDistance(): LiveData<Int> {
         return runDAO.getTotalDistance()
     }
 
-    override suspend fun getTotalAvgSpeed(): LiveData<Float> {
+    override fun getTotalAvgSpeed(): LiveData<Float> {
         return runDAO.getTotalAvgSpeed()
     }
 }

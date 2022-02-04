@@ -10,20 +10,20 @@ interface PokemonRunRepository {
 
     suspend fun deleteRun(run: Run)
 
-    suspend fun getAllRunsSortedByDate(): LiveData<List<Run>>
+    fun getAllRunsSortedByDate(): LiveData<List<Run>>
 
-    suspend fun getAllRunsSortedByTimeInMillis() : LiveData<List<Run>>
+    fun getAllRunsSortedByTimeInMillis() : LiveData<List<Run>>
 
-    suspend fun getAllRunsSortedByAvgSpeed() : LiveData<List<Run>>
+    fun getAllRunsSortedByAvgSpeed() : LiveData<List<Run>>
 
-    suspend fun getAllRunsSortedByDistance() : LiveData<List<Run>>
+    fun getAllRunsSortedByDistance() : LiveData<List<Run>>
 
-    suspend fun getTotalTimeInMillis(): LiveData<Long>
+    fun getTotalTimeInMillis(): LiveData<Long>
 
-    suspend fun getTotalCaloriesBurned(): LiveData<Int>
+    fun getTotalCaloriesBurned(): LiveData<Int>
 
-    suspend fun getTotalDistance(): LiveData<Int>
+    fun getTotalDistance(): LiveData<Int>
 
-    suspend fun getTotalAvgSpeed(): LiveData<Float>
+    fun getTotalAvgSpeed(): LiveData<Float>
 
 }
