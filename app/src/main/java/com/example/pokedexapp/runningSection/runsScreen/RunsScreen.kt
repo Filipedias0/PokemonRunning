@@ -9,6 +9,7 @@ import androidx.compose.foundation.background
 import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.*
 import androidx.compose.foundation.lazy.LazyColumn
+import androidx.compose.foundation.lazy.itemsIndexed
 import androidx.compose.foundation.shape.CircleShape
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material.*
@@ -28,7 +29,6 @@ import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.graphics.TransformOrigin
 import androidx.compose.ui.graphics.asImageBitmap
 import androidx.compose.ui.graphics.graphicsLayer
-import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.style.TextAlign
@@ -36,14 +36,14 @@ import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import androidx.hilt.navigation.compose.hiltViewModel
 import androidx.navigation.NavController
-import coil.ImageLoader
-import coil.compose.rememberImagePainter
 import com.example.pokedexapp.R
-import com.example.pokedexapp.data.models.PokedexListEntry
 import com.example.pokedexapp.db.Run
-import com.example.pokedexapp.favPokemons.FavPokemonsViewModel
+import com.example.pokedexapp.other.TrackingUtility
 import com.example.pokedexapp.util.PermissionsHandler
 import com.google.accompanist.permissions.ExperimentalPermissionsApi
+import java.text.DateFormat.getDateInstance
+import java.text.SimpleDateFormat
+import java.util.*
 
 @RequiresApi(Build.VERSION_CODES.Q)
 @ExperimentalPermissionsApi
@@ -112,7 +112,6 @@ fun RunningWrapper(
         modifier = modifier,
     ) {
 
-
         DropDown(
             text = "Sort By: ${sortByState.value}",
             options = options,
@@ -126,17 +125,10 @@ fun RunningWrapper(
                 .fillMaxWidth()
                 .fillMaxHeight(0.8F)
         ){
-            items(runs.size){
-                runs[it].img?.let { it1 ->
-                    Image(
-                        bitmap = it1.asImageBitmap(),
-                        contentDescription = "Completed run",
-                        modifier = Modifier
-                            .fillMaxSize()
-                    )
-                }
 
-                Text(""+runs[it].avgSpeedInKMH)
+            itemsIndexed(runs){ _, item ->
+                RunSection(item)
+                Spacer(modifier = Modifier.height(22.dp))
             }
         }
 
@@ -260,6 +252,55 @@ fun DropDown(
                         }
                 )
             }
+        }
+    }
+}
+
+@Composable
+fun RunSection(run: Run) {
+    val calendar = Calendar.getInstance().apply {
+        timeInMillis = run.timeStamp
+    }
+    val dateFormat = SimpleDateFormat(
+        "d/MM/yyyy",
+        Locale.getDefault()
+    )
+    val date = dateFormat.format(calendar.time)
+    Column(
+        horizontalAlignment = Alignment.CenterHorizontally,
+        verticalArrangement = Arrangement.SpaceBetween,
+        modifier = Modifier
+            .fillMaxWidth()
+            .shadow(10.dp, RoundedCornerShape(10.dp))
+            .background(Color(255, 203, 8))
+            .padding(12.dp, 8.dp)
+            ){
+        Text(
+            color = Color(0, 103, 180),
+            text = date,
+            modifier = Modifier
+                .padding(bottom = 6.dp)
+            )
+
+        run.img?.asImageBitmap()?.let {
+            Image(
+                bitmap = it,
+                contentDescription = "Completed run",
+                modifier = Modifier
+                    .fillMaxSize()
+            )
+        }
+
+        Row(
+            horizontalArrangement = Arrangement.SpaceBetween,
+            modifier = Modifier
+                .fillMaxWidth()
+                .padding(top = 6.dp)
+        ) {
+            Text(color = Color(0, 103, 180), text = run.avgSpeedInKMH.toString()+"km/h")
+            Text(color = Color(0, 103, 180), text =run.caloriesBurned.toString()+"Kcal")
+            Text(color = Color(0, 103, 180), text =run.distanceInMeters.toString()+"m")
+            Text(color = Color(0, 103, 180), text =TrackingUtility.getFormattedStopWatchTime(run.timeInMillis)+"ms")
         }
     }
 }
