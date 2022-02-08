@@ -30,6 +30,10 @@ class DefaultPokemonRunRepository @Inject constructor(
         return runDAO.getAllRunsSortedByAvgSpeed()
     }
 
+    override fun getAllRunsSortedByCaloriesBurned(): LiveData<List<Run>> {
+        return runDAO.getAllRunsSortedByCaloriesBurned()
+    }
+
     override fun getAllRunsSortedByDistance(): LiveData<List<Run>> {
         return runDAO.getAllRunsSortedByDistance()
     }

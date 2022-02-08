@@ -103,6 +103,16 @@ class RunDaoTest {
     }
 
     @Test
+    fun getAllRunsSortedByCaloriesBurned() = runBlockingTest {
+        val run = Run( timeStamp = 0, avgSpeedInKMH = 0F, distanceInMeters = 0, timeInMillis = 0, caloriesBurned = 0)
+        dao.insertRun(run)
+
+        val allRuns = dao.getAllRunsSortedByCaloriesBurned().getOrAwaitValue()
+
+        assertThat(run).isIn(allRuns)
+    }
+
+    @Test
     fun getAllRunsSortedByDistance() = runBlockingTest {
         val run = Run( timeStamp = 0, avgSpeedInKMH = 0F, distanceInMeters = 0, timeInMillis = 0, caloriesBurned = 0)
         dao.insertRun(run)

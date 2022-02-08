@@ -149,10 +149,6 @@ fun RunningWrapper(
     ) {
     val isTracking by TrackingService.isTracking.observeAsState(false)
     lateinit var context: Context
-    val lifecycleOwner = LocalLifecycleOwner.current
-    val pathPoints by TrackingService.pathPoints.observeAsState()
-    val mapView = rememberMapViewWithLifeCycle()
-    val weight = 80f
 
     fun toggleRun(){
         if(isTracking){

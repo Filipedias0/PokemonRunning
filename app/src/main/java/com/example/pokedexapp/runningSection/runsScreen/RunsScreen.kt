@@ -29,19 +29,22 @@ import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.graphics.TransformOrigin
 import androidx.compose.ui.graphics.asImageBitmap
 import androidx.compose.ui.graphics.graphicsLayer
+import androidx.compose.ui.platform.LocalContext
+import androidx.compose.ui.platform.LocalLifecycleOwner
 import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import androidx.hilt.navigation.compose.hiltViewModel
+import androidx.lifecycle.MutableLiveData
 import androidx.navigation.NavController
 import com.example.pokedexapp.R
 import com.example.pokedexapp.db.Run
+import com.example.pokedexapp.other.SortType
 import com.example.pokedexapp.other.TrackingUtility
 import com.example.pokedexapp.util.PermissionsHandler
 import com.google.accompanist.permissions.ExperimentalPermissionsApi
-import java.text.DateFormat.getDateInstance
 import java.text.SimpleDateFormat
 import java.util.*
 
@@ -102,20 +105,39 @@ fun RunningWrapper(
     navController: NavController,
     viewModel: RunsViewModel,
 ) {
-    var sortByState = remember { mutableStateOf("Date") }
-    val options = listOf("Date", "Distance")
-    val runs : List<Run> by viewModel.runsSortedByDate.observeAsState(listOf())
+    var sortByState = remember { mutableStateOf(viewModel.sortByState) }
+    var sortByText = viewModel.sortByState.observeAsState()
+    val options = listOf("Date", "Distance", "Runing time", "Avg Speed", "Calories burned")
+    var runs : List<Run> = listOf()
+    val lifecycleOwner = LocalLifecycleOwner.current
+
+    fun subscribeToObservers(){
+        sortByState.value.observe(lifecycleOwner, { sortBy ->
+            when(sortBy){
+                options[0] -> viewModel.sortRuns(SortType.DATE)
+                options[1] -> viewModel.sortRuns(SortType.DISTANCE)
+                options[2] -> viewModel.sortRuns(SortType.RUNNING_TIME)
+                options[3] -> viewModel.sortRuns(SortType.AVG_SPEED)
+                options[4] -> viewModel.sortRuns(SortType.CALORIES_BURNED)
+            }
+        })
+
+        viewModel.runs.observe(lifecycleOwner, {
+            runs = it
+        })
+    }
 
     Column(
         horizontalAlignment = Alignment.CenterHorizontally,
         verticalArrangement = Arrangement.Top,
         modifier = modifier,
     ) {
+        subscribeToObservers()
 
         DropDown(
-            text = "Sort By: ${sortByState.value}",
+            text = "Sort By: ${sortByText.value}",
             options = options,
-            sortByState = sortByState,
+            sortByState = sortByState.value,
             modifier = Modifier
         )
 
@@ -167,7 +189,7 @@ fun DropDown(
     modifier: Modifier = Modifier,
     initiallyOpened: Boolean = false,
     options: List<String>,
-    sortByState: MutableState<String>
+    sortByState: MutableLiveData<String>
 ) {
     var isOpen by remember {
         mutableStateOf(initiallyOpened)
@@ -196,7 +218,6 @@ fun DropDown(
             }
             .shadow(10.dp, RoundedCornerShape(10.dp))
             .background(Color(255, 203, 8))
-            .clip(CircleShape)
             .padding(12.dp, 8.dp, 12.dp, 0.dp)
     ) {
         Row(
@@ -236,7 +257,6 @@ fun DropDown(
                 .fillMaxWidth()
                 .shadow(10.dp, RoundedCornerShape(10.dp))
                 .background(Color(255, 203, 8))
-                .clip(CircleShape)
                 .padding(12.dp, 8.dp, 12.dp, 12.dp)
         ) {
             options.forEach {
@@ -247,7 +267,7 @@ fun DropDown(
                     textAlign = TextAlign.Start,
                     modifier = Modifier
                         .clickable {
-                            sortByState.value = it
+                            sortByState.postValue(it)
                             isOpen = false
                         }
                 )

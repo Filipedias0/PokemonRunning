@@ -18,6 +18,8 @@ interface PokemonRunRepository {
 
     fun getAllRunsSortedByDistance() : LiveData<List<Run>>
 
+    fun getAllRunsSortedByCaloriesBurned() : LiveData<List<Run>>
+
     fun getTotalTimeInMillis(): LiveData<Long>
 
     fun getTotalCaloriesBurned(): LiveData<Int>
