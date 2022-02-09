@@ -1,5 +1,6 @@
 package com.example.pokedexapp.runningSection.startRunScreen
 
+import androidx.compose.ui.Modifier
 import androidx.lifecycle.LifecycleOwner
 import androidx.lifecycle.LiveData
 import androidx.lifecycle.MutableLiveData
@@ -15,19 +16,26 @@ import com.example.pokedexapp.runningSection.service.TrackingService
 import com.example.pokedexapp.runningSection.service.sendCommandToService
 import com.example.pokedexapp.util.Resource
 import com.example.pokedexapp.util.constants.Constants
+import dagger.hilt.android.AndroidEntryPoint
 import dagger.hilt.android.lifecycle.HiltViewModel
 import kotlinx.coroutines.launch
 import javax.inject.Inject
+import kotlin.properties.Delegates
 
 @HiltViewModel
 class StartRunViewModel @Inject constructor(
-    private val repository: PokemonRunRepository
+    private val repository: PokemonRunRepository,
 ) : ViewModel() {
+
+    @set:Inject
+    var injectWeight = 80f
+
     fun insertRun(run: Run) = viewModelScope.launch{
         repository.insertRun(run)
     }
 
     companion object {
         var saveRun = MutableLiveData<Run>()
+        var weight = 80F
     }
 }

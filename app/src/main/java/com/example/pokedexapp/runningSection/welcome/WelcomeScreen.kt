@@ -1,6 +1,5 @@
 package com.example.pokedexapp.runningSection.welcome
 
-import android.Manifest
 import android.os.Build
 import androidx.annotation.RequiresApi
 import androidx.compose.foundation.Image
@@ -9,6 +8,7 @@ import androidx.compose.foundation.layout.*
 import androidx.compose.foundation.shape.CircleShape
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.foundation.text.BasicTextField
+import androidx.compose.foundation.text.KeyboardOptions
 import androidx.compose.material.*
 import androidx.compose.runtime.*
 import androidx.compose.runtime.saveable.rememberSaveable
@@ -18,11 +18,11 @@ import androidx.compose.ui.draw.clip
 import androidx.compose.ui.draw.shadow
 import androidx.compose.ui.focus.onFocusChanged
 import androidx.compose.ui.graphics.Color
-import androidx.compose.ui.graphics.toArgb
+import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.text.TextStyle
-import androidx.compose.ui.text.font.FontFamily
 import androidx.compose.ui.text.font.FontWeight
+import androidx.compose.ui.text.input.KeyboardType
 import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
@@ -32,15 +32,13 @@ import com.example.pokedexapp.R
 import com.example.pokedexapp.favPokemons.FavPokemonsViewModel
 import com.example.pokedexapp.util.PermissionsHandler
 import com.google.accompanist.permissions.ExperimentalPermissionsApi
-import com.google.accompanist.permissions.PermissionsRequired
-import com.google.accompanist.permissions.rememberMultiplePermissionsState
 
 @RequiresApi(Build.VERSION_CODES.Q)
 @ExperimentalPermissionsApi
 @Composable
 fun WelcomeScreen(
     navController: NavController,
-    viewModel: FavPokemonsViewModel = hiltViewModel()
+    viewModel: WelcomeScreenViewModel = hiltViewModel()
 ) {
     val showAlert = remember { mutableStateOf(false) }
 
@@ -49,7 +47,7 @@ fun WelcomeScreen(
         modifier = Modifier.fillMaxSize()
     ) {
         PermissionsHandler(showAlert = showAlert, false)
-        RunningWrapper(
+        ContentWrapper(
             modifier = Modifier
                 .fillMaxSize()
                 .padding(
@@ -62,19 +60,31 @@ fun WelcomeScreen(
                 .clip(RoundedCornerShape(10.dp))
                 .background(MaterialTheme.colors.secondary)
                 .padding(16.dp),
-            navController = navController
+            navController = navController,
+            viewModel = viewModel
         )
     }
 
 }
 
 @Composable
-fun RunningWrapper(
+fun ContentWrapper(
     modifier: Modifier = Modifier,
-    navController: NavController
+    navController: NavController,
+    viewModel: WelcomeScreenViewModel
 ) {
-    var textWeight by rememberSaveable { mutableStateOf("Text") }
+    var textWeight by rememberSaveable { mutableStateOf(0F) }
     var textName by rememberSaveable { mutableStateOf("Text") }
+    var context = LocalContext.current
+
+    fun btnContinueOnClick(){
+        val success = viewModel.writePersonalDataToSharedPref(textName, textWeight, context)
+        if (success){
+            navController.navigate(
+                "runs_screen"
+            )
+        }
+    }
 
     Column(
         horizontalAlignment = Alignment.CenterHorizontally,
@@ -105,6 +115,7 @@ fun RunningWrapper(
 
         TextInput(
             hint = "Name",
+            keyboardType = KeyboardType.Text,
             modifier = Modifier
                 .fillMaxWidth()
                 .padding(16.dp)
@@ -114,20 +125,19 @@ fun RunningWrapper(
 
         TextInput(
             hint = "Weight",
+            keyboardType = KeyboardType.Number,
             modifier = Modifier
                 .fillMaxWidth()
                 .padding(16.dp)
         ) {
-            textWeight = it
+            textWeight = it.toFloat()
         }
 
         Button(
             modifier = Modifier
                 .fillMaxWidth(0.5f),
             onClick = {
-                navController.navigate(
-                "runs_screen"
-            )
+                btnContinueOnClick()
                       },
             shape = RoundedCornerShape(20.dp),
             colors = ButtonDefaults.buttonColors(Color(255,203,8))){
@@ -145,6 +155,7 @@ fun RunningWrapper(
 fun TextInput(
     modifier: Modifier = Modifier,
     hint: String = "",
+    keyboardType: KeyboardType = KeyboardType.Text,
     onValueChange: (String) -> Unit = {}
 ) {
     var text by remember {
@@ -162,6 +173,7 @@ fun TextInput(
                 onValueChange(it)
             },
             maxLines = 1,
+            keyboardOptions = KeyboardOptions(keyboardType = keyboardType),
             singleLine = true,
             textStyle = TextStyle(color = Color.Black),
             modifier = Modifier
@@ -183,5 +195,3 @@ fun TextInput(
         }
     }
 }
-
-

@@ -1,6 +1,8 @@
 package com.example.pokedexapp.di
 
 import android.content.Context
+import android.content.Context.MODE_PRIVATE
+import android.content.SharedPreferences
 import androidx.room.Room
 import com.example.pokedexapp.data.remote.PokeApi
 import com.example.pokedexapp.db.PokemonDao
@@ -12,6 +14,10 @@ import com.example.pokedexapp.repository.PokemonRepository
 import com.example.pokedexapp.repository.PokemonRunRepository
 import com.example.pokedexapp.util.constants.Constants.BASE_URL
 import com.example.pokedexapp.util.constants.Constants.DATABASE_NAME
+import com.example.pokedexapp.util.constants.Constants.KEY_FIRST_TIME_TOGGLE
+import com.example.pokedexapp.util.constants.Constants.KEY_NAME
+import com.example.pokedexapp.util.constants.Constants.KEY_WEIGHT
+import com.example.pokedexapp.util.constants.Constants.SHARED_PREFERENCES_NAME
 import dagger.Module
 import dagger.Provides
 import dagger.hilt.InstallIn
@@ -65,4 +71,23 @@ object AppModule {
             .build()
             .create(PokeApi::class.java)
     }
+
+    @Singleton
+    @Provides
+    fun provideSharedPreferences(@ApplicationContext app: Context) =
+        app.getSharedPreferences( SHARED_PREFERENCES_NAME, MODE_PRIVATE)
+
+    @Singleton
+    @Provides
+    fun provideName(sharedPref: SharedPreferences) = sharedPref.getString(KEY_NAME, "") ?: ""
+
+    @Singleton
+    @Provides
+    fun provideWeight(sharedPref: SharedPreferences) = sharedPref.getFloat(KEY_WEIGHT, 80F)
+
+    @Singleton
+    @Provides
+    fun provideFirstTimeToggle(sharedPref: SharedPreferences) =
+        sharedPref.getBoolean(KEY_FIRST_TIME_TOGGLE, true)
+
 }

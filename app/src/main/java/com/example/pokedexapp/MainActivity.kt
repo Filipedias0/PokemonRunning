@@ -3,11 +3,7 @@ package com.example.pokedexapp
 import android.os.Bundle
 import androidx.activity.ComponentActivity
 import androidx.activity.compose.setContent
-import androidx.compose.foundation.layout.Column
-import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.size
-import androidx.compose.foundation.layout.width
-import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material.*
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.Favorite
@@ -15,17 +11,10 @@ import androidx.compose.material.icons.filled.Home
 import androidx.compose.material.icons.filled.Place
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.remember
-import androidx.compose.ui.Alignment
-import androidx.compose.ui.Alignment.Companion.CenterHorizontally
 import androidx.compose.ui.graphics.Color
-import androidx.compose.ui.text.toLowerCase
-import androidx.compose.ui.tooling.preview.Preview
-import androidx.navigation.NavController
-import androidx.navigation.NavType
 import androidx.navigation.compose.NavHost
 import androidx.navigation.compose.composable
 import androidx.navigation.compose.rememberNavController
-import androidx.navigation.navArgument
 import com.example.pokedexapp.favPokemons.FavPokemonsScreen
 import com.example.pokedexapp.pokemonList.PokemonListScreen
 import com.example.pokedexapp.pokemondetail.PokemonDetailScreen
@@ -33,25 +22,28 @@ import com.example.pokedexapp.runningSection.runsScreen.RunsScreen
 import com.example.pokedexapp.ui.theme.PokedexAppTheme
 import dagger.hilt.android.AndroidEntryPoint
 import androidx.compose.ui.Modifier
-import androidx.compose.ui.draw.clip
-import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.unit.dp
-import androidx.compose.ui.unit.sp
-import androidx.navigation.NavHostController
+import androidx.navigation.*
 import androidx.navigation.compose.currentBackStackEntryAsState
 import com.example.pokedexapp.runningSection.startRunScreen.StartRunScreen
 import com.example.pokedexapp.runningSection.welcome.WelcomeScreen
 import com.google.accompanist.permissions.ExperimentalPermissionsApi
 import java.util.*
+import javax.inject.Inject
 
 @AndroidEntryPoint
 class MainActivity : ComponentActivity() {
+
+    @set:Inject
+    var isFirstAppOpen = true
+
     @ExperimentalPermissionsApi
     @ExperimentalMaterialApi
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
         setContent {
             val navController = rememberNavController()
+
             PokedexAppTheme {
                 Scaffold(
                     bottomBar = {
@@ -80,7 +72,7 @@ class MainActivity : ComponentActivity() {
                         )
                     }
                 ) {
-                    Navigation(navController = navController)
+                    Navigation(navController = navController, isFirstAppOpen = isFirstAppOpen)
                 }
             }
         }
@@ -91,7 +83,7 @@ class MainActivity : ComponentActivity() {
 
 @ExperimentalPermissionsApi
 @Composable
-fun Navigation(navController: NavHostController){
+fun Navigation(navController: NavHostController, isFirstAppOpen: Boolean){
         NavHost(
             navController = navController,
             startDestination = "pokemon_list_screen"
@@ -128,7 +120,11 @@ fun Navigation(navController: NavHostController){
             }
 
             composable("welcome_screen"){
-                WelcomeScreen(navController = navController)
+                if(isFirstAppOpen) {
+                    WelcomeScreen(navController = navController)
+                }else{
+                    RunsScreen(navController = navController)
+                }
             }
 
             composable("runs_screen") {

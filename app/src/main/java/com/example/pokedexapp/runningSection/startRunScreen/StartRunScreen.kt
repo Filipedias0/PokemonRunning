@@ -55,8 +55,10 @@ import com.example.pokedexapp.util.constants.Constants.POLYLINE_COLOR
 import com.example.pokedexapp.util.constants.Constants.POLYLINE_WIDTH
 import com.google.android.libraries.maps.GoogleMap
 import com.google.android.libraries.maps.model.LatLngBounds
+import dagger.hilt.android.AndroidEntryPoint
 import timber.log.Timber
 import java.util.*
+import javax.inject.Inject
 import kotlin.math.round
 
 @RequiresApi(Build.VERSION_CODES.Q)
@@ -72,6 +74,8 @@ fun StartRunScreen(
     val lifecycleOwner = LocalLifecycleOwner.current
     var curTimeInMillis = 0L
     val context = LocalContext.current
+
+    StartRunViewModel.weight = viewModel.injectWeight
 
     fun cancelRun(){
         sendCommandToService(context = context, command = ACTION_STOP_SERVICE)
@@ -237,12 +241,13 @@ fun RunningWrapper(
 }
 
 @Composable
-fun MapHandler() {
+fun MapHandler( ) {
     val mapView = rememberMapViewWithLifeCycle()
     var map: GoogleMap? = null
     val pathPoints by TrackingService.pathPoints.observeAsState()
     val lifecycleOwner = LocalLifecycleOwner.current
-    val weight = 80f
+    val weight = StartRunViewModel.weight
+
     val context = LocalContext.current
     var curTimeInMillis = 0L
 
