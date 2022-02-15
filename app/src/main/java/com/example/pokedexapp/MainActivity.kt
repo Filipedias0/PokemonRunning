@@ -25,7 +25,9 @@ import androidx.compose.ui.Modifier
 import androidx.compose.ui.unit.dp
 import androidx.navigation.*
 import androidx.navigation.compose.currentBackStackEntryAsState
+import com.example.pokedexapp.runningSection.settingsScreen.SettingsScreen
 import com.example.pokedexapp.runningSection.startRunScreen.StartRunScreen
+import com.example.pokedexapp.runningSection.statisticsScreen.StatisticsScreen
 import com.example.pokedexapp.runningSection.welcome.WelcomeScreen
 import com.google.accompanist.permissions.ExperimentalPermissionsApi
 import java.util.*
@@ -133,6 +135,14 @@ fun Navigation(navController: NavHostController, isFirstAppOpen: Boolean){
 
             composable("start_run_screen") {
                 StartRunScreen(navController = navController)
+            }
+
+            composable("settings_screen") {
+                SettingsScreen(navController = navController)
+            }
+
+            composable("statistics_screen") {
+                StatisticsScreen(navController = navController)
             }
         }
 }

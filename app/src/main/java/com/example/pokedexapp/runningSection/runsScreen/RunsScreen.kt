@@ -10,12 +10,13 @@ import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.*
 import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.foundation.lazy.itemsIndexed
-import androidx.compose.foundation.shape.CircleShape
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material.*
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.Add
 import androidx.compose.material.icons.filled.ArrowDropDown
+import androidx.compose.material.icons.filled.Face
+import androidx.compose.material.icons.filled.Settings
 import androidx.compose.runtime.*
 import androidx.compose.runtime.livedata.observeAsState
 import androidx.compose.ui.Alignment
@@ -29,7 +30,6 @@ import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.graphics.TransformOrigin
 import androidx.compose.ui.graphics.asImageBitmap
 import androidx.compose.ui.graphics.graphicsLayer
-import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.platform.LocalLifecycleOwner
 import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.text.font.FontWeight
@@ -66,24 +66,19 @@ fun RunsScreen(
                 .fillMaxSize()
                 .padding(top = 20.dp)
         ) {
-            Row(
+            Image(
+                painter = painterResource(id = R.drawable.ic_international_pok_mon_logo),
+                contentDescription = "Pokemon",
                 modifier = Modifier
                     .fillMaxWidth()
-            ) {
-                Image(
-                    painter = painterResource(id = R.drawable.ic_international_pok_mon_logo),
-                    contentDescription = "Pokemon",
-                    modifier = Modifier
-                        .fillMaxWidth()
-                )
-            }
+            )
+            Spacer(modifier = Modifier.height(16.dp))
 
             PermissionsHandler(showAlert = showAlert, false)
             RunningWrapper(
                 modifier = Modifier
                     .fillMaxSize()
                     .padding(
-                        top = 16.dp,
                         start = 16.dp,
                         end = 16.dp,
                         bottom = 16.dp
@@ -134,11 +129,12 @@ fun RunningWrapper(
     ) {
         subscribeToObservers()
 
-        DropDown(
+        DropDownRow(
             text = "Sort By: ${sortByText.value}",
             options = options,
             sortByState = sortByState.value,
-            modifier = Modifier
+            modifier = Modifier,
+            navControler = navController
         )
 
         LazyColumn(
@@ -184,12 +180,13 @@ fun RunningWrapper(
 }
 
 @Composable
-fun DropDown(
+fun DropDownRow(
     text: String,
     modifier: Modifier = Modifier,
     initiallyOpened: Boolean = false,
     options: List<String>,
-    sortByState: MutableLiveData<String>
+    sortByState: MutableLiveData<String>,
+    navControler: NavController
 ) {
     var isOpen by remember {
         mutableStateOf(initiallyOpened)
@@ -209,70 +206,119 @@ fun DropDown(
         )
     )
 
-    Column(
-        horizontalAlignment = Start,
+    Row(
+        verticalAlignment = Alignment.CenterVertically,
+        horizontalArrangement = Arrangement.SpaceBetween,
         modifier = Modifier
             .fillMaxWidth()
-            .clickable {
-                isOpen = !isOpen
-            }
-            .shadow(10.dp, RoundedCornerShape(10.dp))
-            .background(Color(255, 203, 8))
-            .padding(12.dp, 8.dp, 12.dp, 0.dp)
     ) {
-        Row(
-            horizontalArrangement = Arrangement.SpaceBetween,
-            modifier = Modifier
-                .fillMaxWidth()
-        ) {
-            Text(
-                text = text,
-                fontWeight = FontWeight.Medium,
-                color = Color(0,103,180),
-                fontSize = 20.sp,
-            )
-            Icon(
-                imageVector = Icons.Default.ArrowDropDown,
-                contentDescription = "Open or close the dropdown",
-                tint = Color(0,103,180),
+
+        Column(){
+
+        Row(){
+
+            Column(
+                horizontalAlignment = Start,
                 modifier = Modifier
-                    .scale(1f, if (isOpen) -1f else 1f)
-            )
-
-        }
-
-        Spacer(modifier = Modifier.height(10.dp))
-    }
-
-
-    if(isOpen){
-        Column(
-            horizontalAlignment = Start,
-            modifier = Modifier
-                .graphicsLayer {
-                    transformOrigin = TransformOrigin(0.5f, 0f)
-                    rotationX = rotateX.value
-                }
-                .alpha(alpha.value)
-                .fillMaxWidth()
-                .shadow(10.dp, RoundedCornerShape(10.dp))
-                .background(Color(255, 203, 8))
-                .padding(12.dp, 8.dp, 12.dp, 12.dp)
-        ) {
-            options.forEach {
-                Text(
-                    text = it,
-                    fontSize = 18.sp,
-                    color = Color(0,103,180),
-                    textAlign = TextAlign.Start,
+                    .fillMaxWidth(0.6F)
+                    .clickable {
+                        isOpen = !isOpen
+                    }
+                    .shadow(10.dp, RoundedCornerShape(10.dp))
+                    .background(Color(255, 203, 8))
+                    .padding(12.dp, 8.dp, 12.dp, 0.dp)
+            ) {
+                Row(
+                    horizontalArrangement = Arrangement.SpaceBetween,
                     modifier = Modifier
+                        .fillMaxWidth()
+                ) {
+                    Text(
+                        text = text,
+                        fontWeight = FontWeight.Medium,
+                        color = Color(0, 103, 180),
+                        fontSize = 20.sp,
+                    )
+                    Icon(
+                        imageVector = Icons.Default.ArrowDropDown,
+                        contentDescription = "Open or close the dropdown",
+                        tint = Color(0, 103, 180),
+                        modifier = Modifier
+                            .scale(1f, if (isOpen) -1f else 1f)
+                    )
+
+                }
+
+                Spacer(modifier = Modifier.height(10.dp))
+            }
+
+            Row(
+                verticalAlignment = Alignment.CenterVertically,
+                horizontalArrangement = Arrangement.SpaceBetween,
+                modifier = Modifier
+                    .fillMaxWidth()
+                    .padding(
+                        top = 5.dp,
+                        start = 22.dp
+                        )
+            ){
+
+                Icon(
+                    imageVector = Icons.Default.Settings,
+                    contentDescription = "Settings",
+                    tint = Color.White,
+                    modifier = Modifier
+                        .size(36.dp)
                         .clickable {
-                            sortByState.postValue(it)
-                            isOpen = false
+                            navControler.navigate("settings_screen")
                         }
                 )
+
+                Icon(
+                    imageVector = Icons.Default.Face,
+                    contentDescription = "Statistics screen",
+                    tint = Color.White,
+                    modifier = Modifier
+                        .size(36.dp)
+                        .clickable {
+                            navControler.navigate("statistics_screen")
+                        }
+                )
+
+            }
+
+        }
+
+        if (isOpen) {
+            Column(
+                horizontalAlignment = Start,
+                modifier = Modifier
+                    .graphicsLayer {
+                        transformOrigin = TransformOrigin(0.5f, 0f)
+                        rotationX = rotateX.value
+                    }
+                    .alpha(alpha.value)
+                    .fillMaxWidth(0.6F)
+                    .shadow(10.dp, RoundedCornerShape(10.dp))
+                    .background(Color(255, 203, 8))
+                    .padding(12.dp, 8.dp, 12.dp, 12.dp)
+            ) {
+                options.forEach {
+                    Text(
+                        text = it,
+                        fontSize = 18.sp,
+                        color = Color(0, 103, 180),
+                        textAlign = TextAlign.Start,
+                        modifier = Modifier
+                            .clickable {
+                                sortByState.postValue(it)
+                                isOpen = false
+                            }
+                    )
+                }
             }
         }
+    }
     }
 }
 

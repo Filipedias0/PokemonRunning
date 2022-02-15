@@ -1,4 +1,4 @@
-package com.example.pokedexapp.runningSection.welcome
+package com.example.pokedexapp.runningSection.settingsScreen
 
 import android.os.Build
 import androidx.annotation.RequiresApi
@@ -28,6 +28,10 @@ import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import androidx.hilt.navigation.compose.hiltViewModel
 import androidx.navigation.NavController
+import coil.ImageLoader
+import coil.compose.rememberImagePainter
+import coil.decode.GifDecoder
+import coil.decode.ImageDecoderDecoder
 import com.example.pokedexapp.R
 import com.example.pokedexapp.favPokemons.FavPokemonsViewModel
 import com.example.pokedexapp.util.PermissionsHandler
@@ -36,9 +40,9 @@ import com.google.accompanist.permissions.ExperimentalPermissionsApi
 @RequiresApi(Build.VERSION_CODES.Q)
 @ExperimentalPermissionsApi
 @Composable
-fun WelcomeScreen(
+fun SettingsScreen(
     navController: NavController,
-    viewModel: WelcomeScreenViewModel = hiltViewModel()
+    viewModel: SettingsViewModel = hiltViewModel()
 ) {
     val showAlert = remember { mutableStateOf(false) }
 
@@ -46,9 +50,7 @@ fun WelcomeScreen(
         color = MaterialTheme.colors.background,
         modifier = Modifier.fillMaxSize()
     ) {
-        Column{
-            PermissionsHandler(showAlert = showAlert, false)
-
+        Column {
             Spacer(modifier = Modifier.height(20.dp))
             Image(
                 painter = painterResource(id = R.drawable.ic_international_pok_mon_logo),
@@ -62,7 +64,6 @@ fun WelcomeScreen(
                 modifier = Modifier
                     .fillMaxSize()
                     .padding(
-                        top = 48.dp,
                         start = 16.dp,
                         end = 16.dp,
                         bottom = 16.dp
@@ -74,6 +75,7 @@ fun WelcomeScreen(
                 navController = navController,
                 viewModel = viewModel
             )
+
         }
     }
 
@@ -83,14 +85,14 @@ fun WelcomeScreen(
 fun ContentWrapper(
     modifier: Modifier = Modifier,
     navController: NavController,
-    viewModel: WelcomeScreenViewModel
+    viewModel: SettingsViewModel
 ) {
     var textWeight by rememberSaveable { mutableStateOf(0F) }
     var textName by rememberSaveable { mutableStateOf("Text") }
     var context = LocalContext.current
 
-    fun btnContinueOnClick(){
-        val success = viewModel.writePersonalDataToSharedPref(textName, textWeight, context)
+    fun btnUpdateOnClick(){
+        val success = true
         if (success){
             navController.navigate(
                 "runs_screen"
@@ -104,21 +106,34 @@ fun ContentWrapper(
         modifier = modifier
     ) {
         Text(
-            text = "Welcome!",
+            text = "Settings",
             fontWeight = FontWeight.Bold,
             color = Color(0,103,180),
             textAlign = TextAlign.Center,
             fontSize = 30.sp,
         )
 
+        var gifLoader = ImageLoader.Builder(LocalContext.current)
+            .componentRegistry {
+                if (Build.VERSION.SDK_INT >= 28) {
+                    add(ImageDecoderDecoder(LocalContext.current))
+                } else {
+                    add(GifDecoder())
+                }
+            }
+            .build()
+
+        val painter = rememberImagePainter(R.drawable.klink, gifLoader)
         Image(
-            painter = painterResource(R.drawable.poke_ball_pin),
-            contentDescription = null,
-            modifier = Modifier.requiredSize(60.dp)
+            painter = painter,
+            contentDescription = "Pokemon Klink",
+            modifier = Modifier
+                .size(90.dp)
+                .align(Alignment.CenterHorizontally)
         )
 
         Text(
-            text = "Please enter your name and weight",
+            text = "Update name and weight",
             fontWeight = FontWeight.Bold,
             color = Color(0,103,180),
             textAlign = TextAlign.Center,
@@ -149,8 +164,8 @@ fun ContentWrapper(
             modifier = Modifier
                 .fillMaxWidth(0.5f),
             onClick = {
-                btnContinueOnClick()
-                      },
+                btnUpdateOnClick()
+            },
             shape = RoundedCornerShape(20.dp),
             colors = ButtonDefaults.buttonColors(Color(255,203,8))){
             Text(
