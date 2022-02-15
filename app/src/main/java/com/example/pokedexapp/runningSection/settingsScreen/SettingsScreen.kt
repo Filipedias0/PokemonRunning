@@ -1,6 +1,8 @@
 package com.example.pokedexapp.runningSection.settingsScreen
 
+import android.content.SharedPreferences
 import android.os.Build
+import android.widget.Toast
 import androidx.annotation.RequiresApi
 import androidx.compose.foundation.Image
 import androidx.compose.foundation.background
@@ -36,6 +38,8 @@ import com.example.pokedexapp.R
 import com.example.pokedexapp.favPokemons.FavPokemonsViewModel
 import com.example.pokedexapp.util.PermissionsHandler
 import com.google.accompanist.permissions.ExperimentalPermissionsApi
+import dagger.hilt.android.AndroidEntryPoint
+import javax.inject.Inject
 
 @RequiresApi(Build.VERSION_CODES.Q)
 @ExperimentalPermissionsApi
@@ -44,7 +48,6 @@ fun SettingsScreen(
     navController: NavController,
     viewModel: SettingsViewModel = hiltViewModel()
 ) {
-    val showAlert = remember { mutableStateOf(false) }
 
     Surface(
         color = MaterialTheme.colors.background,
@@ -87,17 +90,12 @@ fun ContentWrapper(
     navController: NavController,
     viewModel: SettingsViewModel
 ) {
-    var textWeight by rememberSaveable { mutableStateOf(0F) }
-    var textName by rememberSaveable { mutableStateOf("Text") }
+    var textWeight by viewModel.weight
+    var textName by viewModel.name
     var context = LocalContext.current
 
-    fun btnUpdateOnClick(){
-        val success = true
-        if (success){
-            navController.navigate(
-                "runs_screen"
-            )
-        }
+    fun updateSharedPref(){
+        viewModel.applyChangesToSharedPreferences(name = textName, weight = textWeight, context = context)
     }
 
     Column(
@@ -141,7 +139,7 @@ fun ContentWrapper(
         )
 
         TextInput(
-            hint = "Name",
+            hint = textName,
             keyboardType = KeyboardType.Text,
             modifier = Modifier
                 .fillMaxWidth()
@@ -151,7 +149,7 @@ fun ContentWrapper(
         }
 
         TextInput(
-            hint = "Weight",
+            hint = textWeight.toString(),
             keyboardType = KeyboardType.Number,
             modifier = Modifier
                 .fillMaxWidth()
@@ -164,7 +162,7 @@ fun ContentWrapper(
             modifier = Modifier
                 .fillMaxWidth(0.5f),
             onClick = {
-                btnUpdateOnClick()
+                updateSharedPref()
             },
             shape = RoundedCornerShape(20.dp),
             colors = ButtonDefaults.buttonColors(Color(255,203,8))){
