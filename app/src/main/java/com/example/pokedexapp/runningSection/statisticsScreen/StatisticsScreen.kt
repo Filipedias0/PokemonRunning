@@ -2,32 +2,18 @@ package com.example.pokedexapp.runningSection.statisticsScreen
 
 import android.os.Build
 import androidx.annotation.RequiresApi
-import androidx.compose.animation.core.animateFloatAsState
-import androidx.compose.animation.core.tween
 import androidx.compose.foundation.Image
 import androidx.compose.foundation.background
-import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.*
-import androidx.compose.foundation.lazy.LazyColumn
-import androidx.compose.foundation.lazy.itemsIndexed
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material.*
-import androidx.compose.material.icons.Icons
-import androidx.compose.material.icons.filled.Add
-import androidx.compose.material.icons.filled.ArrowDropDown
-import androidx.compose.material.icons.filled.Face
-import androidx.compose.material.icons.filled.Settings
 import androidx.compose.runtime.*
 import androidx.compose.runtime.livedata.observeAsState
 import androidx.compose.ui.Alignment
-import androidx.compose.ui.Alignment.Companion.Start
 import androidx.compose.ui.Modifier
-import androidx.compose.ui.draw.alpha
 import androidx.compose.ui.draw.clip
-import androidx.compose.ui.draw.scale
 import androidx.compose.ui.draw.shadow
 import androidx.compose.ui.graphics.Color
-import androidx.compose.ui.graphics.TransformOrigin
 import androidx.compose.ui.graphics.asImageBitmap
 import androidx.compose.ui.graphics.graphicsLayer
 import androidx.compose.ui.platform.LocalContext
@@ -50,6 +36,7 @@ import com.example.pokedexapp.other.SortType
 import com.example.pokedexapp.other.TrackingUtility
 import com.example.pokedexapp.util.PermissionsHandler
 import com.google.accompanist.permissions.ExperimentalPermissionsApi
+import java.lang.Math.round
 import java.text.SimpleDateFormat
 import java.util.*
 
@@ -91,6 +78,7 @@ fun StatisticsScreen(
                     .clip(RoundedCornerShape(10.dp))
                     .background(MaterialTheme.colors.secondary)
                     .padding(16.dp),
+                viewModel = viewModel
             )
         }
     }
@@ -99,7 +87,22 @@ fun StatisticsScreen(
 @Composable
 fun RunningWrapper(
     modifier: Modifier = Modifier,
+    viewModel: StatisticsViewModel
 ) {
+    val totalTime = viewModel.totalTimeRun.observeAsState().value?.let {
+        TrackingUtility.getFormattedStopWatchTime(it)
+    } ?: "00:00:00"
+    val totalAvgSpeed = viewModel.totalAvgSpeed.observeAsState().value?.let {
+        val avgSpeed = round(it * 10f) / 10f
+        "${avgSpeed}km/h"
+    }
+    val totalCaloriesBurned by viewModel.totalCaloriesBurned.observeAsState("0kcal")
+    val totalDistance = viewModel.totalDistance.observeAsState().value?.let {
+        val km = it / 1000f
+        val totalDistance = Math.round(km * 10f) / 10f
+        "${totalDistance}km"
+    } ?: "0km"
+    val runsSortedByDate by viewModel.runsSortedByDate.observeAsState()
     Column(
         horizontalAlignment = Alignment.CenterHorizontally,
         verticalArrangement = Arrangement.Top,
@@ -152,7 +155,7 @@ fun RunningWrapper(
             ) {
 
                 Text(
-                    text = "00:00:00",
+                    text = totalTime,
                     fontSize = 32.sp,
                     fontWeight = FontWeight.Medium,
                     color = Color(255, 203, 8),
@@ -173,7 +176,7 @@ fun RunningWrapper(
             ) {
 
                 Text(
-                    text = "0 Km",
+                    text = totalDistance,
                     fontSize = 32.sp,
                     fontWeight = FontWeight.Medium,
                     color = Color(255, 203, 8),
@@ -201,7 +204,7 @@ fun RunningWrapper(
                 horizontalAlignment = Alignment.CenterHorizontally
             ) {
                 Text(
-                    text = "0 Kcal",
+                    text = totalCaloriesBurned.toString()+"kcal",
                     fontSize = 32.sp,
                     fontWeight = FontWeight.Medium,
                     color = Color(255, 203, 8),
@@ -221,7 +224,7 @@ fun RunningWrapper(
             ) {
 
                 Text(
-                    text = "0 Km/H",
+                    text = totalAvgSpeed.toString(),
                     fontSize = 32.sp,
                     fontWeight = FontWeight.Medium,
                     color = Color(255, 203, 8),
