@@ -35,7 +35,7 @@ class StartRunViewModel @Inject constructor(
     }
 
     companion object {
-        var saveRun = MutableLiveData<Run>()
+        var saveRun = MutableLiveData<Run>(null)
         var weight = 80F
     }
 }

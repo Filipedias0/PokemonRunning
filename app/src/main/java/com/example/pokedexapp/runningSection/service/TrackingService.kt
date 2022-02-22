@@ -29,7 +29,6 @@ import com.google.android.gms.location.LocationCallback
 import com.google.android.gms.location.LocationRequest
 import com.google.android.gms.location.LocationResult
 import com.google.android.libraries.maps.model.LatLng
-import timber.log.Timber
 import com.example.pokedexapp.util.constants.Constants.FASTEST_LOCATION_INTERVAL
 import com.example.pokedexapp.util.constants.Constants.LOCATION_UPDATE_INTERVAL
 import com.example.pokedexapp.util.constants.Constants.NOTIFICATION_CHANNEL_GENERAL
@@ -226,7 +225,6 @@ class TrackingService : LifecycleService() {
                 result.locations.let { locations ->
                     for(location in locations){
                         addPathPoint(location)
-                        Timber.d("NEW LOCATION: ${location.latitude}, ${location.longitude}")
                     }
                 }
             }
@@ -255,7 +253,6 @@ class TrackingService : LifecycleService() {
     }
 
     private fun addEmptyPolyline() = pathPoints.value?.apply {
-        Timber.d("addEmptyPolyline")
         add(mutableListOf())
         pathPoints.postValue(this)
     } ?: pathPoints.postValue(mutableListOf(mutableListOf()))

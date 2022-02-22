@@ -3,6 +3,7 @@ package com.example.pokedexapp.runningSection.startRunScreen
 import android.content.Context
 import android.os.Build
 import android.os.Bundle
+import android.util.Log
 import android.widget.Toast
 import android.widget.Toast.LENGTH_SHORT
 import androidx.annotation.RequiresApi
@@ -73,17 +74,7 @@ fun StartRunScreen(
     var textTimer = remember { mutableStateOf("00:00:00") }
     val lifecycleOwner = LocalLifecycleOwner.current
     var curTimeInMillis = 0L
-    val context = LocalContext.current
-
     StartRunViewModel.weight = viewModel.injectWeight
-
-    fun cancelRun(){
-        sendCommandToService(context = context, command = ACTION_STOP_SERVICE)
-        textTimer.value = "00:00:00:00"
-        navController.navigate(
-            "runs_screen"
-        )
-    }
 
     fun subscribeToObservers() {
         TrackingService.timeRunInMillis.observe(lifecycleOwner, {
@@ -93,12 +84,15 @@ fun StartRunScreen(
         })
 
         StartRunViewModel.saveRun.observe(lifecycleOwner){
-            viewModel.insertRun(it)
-            textTimer.value = "00:00:00:00"
+            if(it != null) {
+                Timber.d(" Teste saveRun")
+                viewModel.insertRun(it)
+                StartRunViewModel.saveRun.postValue(null)
+                textTimer.value = "00:00:00:00"
+                TrackingService.timeRunInMillis.postValue(0L)
 
-            navController.navigate(
-                "runs_screen"
-            )
+                navController.popBackStack()
+            }
         }
     }
 
@@ -130,12 +124,8 @@ fun StartRunScreen(
                 .shadow(10.dp, RoundedCornerShape(10.dp))
                 .clip(RoundedCornerShape(10.dp))
                 .background(MaterialTheme.colors.secondary),
-            navController = navController,
             showFinishRunDialog =   showFinishRunDialog,
             textTimer = textTimer,
-            curTimeInMillis = curTimeInMillis,
-            viewModel = viewModel,
-            cancelRun = { cancelRun() }
         )
     }
 
@@ -144,12 +134,8 @@ fun StartRunScreen(
 @Composable
 fun RunningWrapper(
     modifier: Modifier = Modifier,
-    navController: NavController,
     showFinishRunDialog: MutableState<Boolean>,
     textTimer: MutableState<String>,
-    curTimeInMillis: Long,
-    viewModel: StartRunViewModel,
-    cancelRun: () -> Unit,
     ) {
     val isTracking by TrackingService.isTracking.observeAsState(false)
     lateinit var context: Context
@@ -295,7 +281,6 @@ fun MapHandler( ) {
     }
 
     fun addAllPolylines() {
-        Timber.d("addAllPolylines")
         for (polyline in pathPoints!!) {
             val polylineOptions = PolylineOptions()
                 .color(POLYLINE_COLOR)
@@ -317,7 +302,6 @@ fun MapHandler( ) {
     }
 
     fun addLatestPolyline() {
-        Timber.d("addLatestPolyline")
         //TODO the color of the polyline will be the predominant color of the favorite pokemon
         //TODO make the favorite pokemon run in the map ex
         // val markerOptions = MarkerOptions()
@@ -343,9 +327,11 @@ fun MapHandler( ) {
         })
 
         TrackingService.endRunAndSaveIntoDb.observe(lifecycleOwner){
-            if(it) {
+            if(it == true) {
+                Timber.d("Teste EndRun")
                 zoomToSeeWholeTrack()
                 endRunAndSaveToDb()
+                TrackingService.endRunAndSaveIntoDb.postValue(false)
             }
         }
 
@@ -418,10 +404,9 @@ fun FinishRunDialog(
 
     fun cancelRun(){
         sendCommandToService(context = context, command = ACTION_STOP_SERVICE)
+        TrackingService.timeRunInMillis.postValue(0L)
         textTimer.value = "00:00:00:00"
-        navController.navigate(
-            "runs_screen"
-        )
+        navController.popBackStack()
     }
     AlertDialog(
         onDismissRequest = {

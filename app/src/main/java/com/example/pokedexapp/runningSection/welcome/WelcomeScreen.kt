@@ -56,13 +56,12 @@ fun WelcomeScreen(
                 modifier = Modifier
                     .fillMaxWidth()
             )
-            Spacer(modifier = Modifier.height(16.dp))
 
             ContentWrapper(
                 modifier = Modifier
                     .fillMaxSize()
                     .padding(
-                        top = 48.dp,
+                        top = 20.dp,
                         start = 16.dp,
                         end = 16.dp,
                         bottom = 16.dp
@@ -150,7 +149,7 @@ fun ContentWrapper(
                 .fillMaxWidth(0.5f),
             onClick = {
                 btnContinueOnClick()
-                      },
+            },
             shape = RoundedCornerShape(20.dp),
             colors = ButtonDefaults.buttonColors(Color(255,203,8))){
             Text(
