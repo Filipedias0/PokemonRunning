@@ -9,6 +9,7 @@ import androidx.compose.foundation.background
 import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.*
 import androidx.compose.foundation.lazy.LazyColumn
+import androidx.compose.foundation.lazy.items
 import androidx.compose.foundation.lazy.itemsIndexed
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material.*
@@ -103,8 +104,9 @@ fun RunningWrapper(
     val sortByState = remember { mutableStateOf(viewModel.sortByState) }
     val sortByText = viewModel.sortByState.observeAsState()
     val options = listOf("Date", "Distance", "Running time", "Avg Speed", "Calories burned")
-    var runs : List<Run> = listOf()
+    val runs by  viewModel.runsMediator.observeAsState(listOf())
     val lifecycleOwner = LocalLifecycleOwner.current
+    val isLoading = viewModel.loading.value
 
     fun subscribeToObservers(){
         sortByState.value.observe(lifecycleOwner) { sortBy ->
@@ -115,10 +117,6 @@ fun RunningWrapper(
                 options[3] -> viewModel.sortRuns(SortType.AVG_SPEED)
                 options[4] -> viewModel.sortRuns(SortType.CALORIES_BURNED)
             }
-        }
-
-        viewModel.runs.observe(lifecycleOwner) {
-            runs = it
         }
     }
 
@@ -136,6 +134,17 @@ fun RunningWrapper(
             navController = navController
         )
 
+        if(isLoading){
+            CircularProgressIndicator(
+                color = MaterialTheme.colors.primary,
+                modifier = Modifier
+                    .padding(20.dp)
+                    .padding(top= 120.dp)
+                    .fillMaxWidth(0.5f)
+                    .fillMaxHeight(0.5f)
+            )
+        }
+
         LazyColumn(
             contentPadding = PaddingValues(16.dp),
             modifier = Modifier
@@ -143,7 +152,7 @@ fun RunningWrapper(
                 .fillMaxHeight(0.8F)
         ){
 
-            itemsIndexed(runs){ _, item ->
+            items(runs){ item ->
                 RunSection(item)
                 Spacer(modifier = Modifier.height(22.dp))
             }
@@ -258,7 +267,7 @@ fun DropDownRow(
                     .padding(
                         top = 5.dp,
                         start = 22.dp
-                        )
+                    )
             ){
 
                 Icon(
