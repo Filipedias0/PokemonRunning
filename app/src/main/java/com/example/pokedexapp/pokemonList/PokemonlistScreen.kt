@@ -37,6 +37,8 @@ import com.example.pokedexapp.data.models.PokedexListEntry
 import com.plcoding.jetpackcomposepokedex.ui.theme.RobotoCondensed
 import androidx.compose.material.*
 import androidx.hilt.navigation.compose.hiltViewModel
+import kotlinx.coroutines.delay
+import kotlinx.coroutines.launch
 
 @Composable
 fun PokemonListScreen(
@@ -62,7 +64,7 @@ fun PokemonListScreen(
                     .fillMaxWidth()
                     .padding(16.dp)
             ) {
-                viewModel.searchPokemonList(it)
+                    viewModel.searchPokemonList(it)
             }
             Spacer(modifier = Modifier.height(16.dp))
             PokemonList(navController = navController)
@@ -99,7 +101,7 @@ fun SearchBar(
                 .background(Color.White, CircleShape)
                 .padding(horizontal = 20.dp, vertical = 12.dp)
                 .onFocusChanged {
-                    isHintDisplayed = !it.isFocused && text.isNotEmpty()
+                    isHintDisplayed = !it.isFocused && text.isEmpty()
                 }
         )
         if(isHintDisplayed) {
@@ -217,7 +219,7 @@ fun PokemonList(
         if(isLoading){
             CircularProgressIndicator( color = MaterialTheme.colors.primary )
         }
-        if(loadError.isNotEmpty()){
+        if(loadError != "Success" && !isLoading){
             RetrySection(error = loadError) {
                 viewModel.pokemonList.value = viewModel.cachedPokemonList
             }
