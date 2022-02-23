@@ -124,6 +124,7 @@ class PokemonListViewModel @Inject constructor(
     ) {
         val bmp = (drawable as BitmapDrawable).bitmap.copy(Bitmap.Config.ARGB_8888, true)
 
+
         Palette.from(bmp).generate { pallete ->
             pallete?.dominantSwatch?.rgb?.let { colorValue ->
                 onFinish(Color(colorValue))

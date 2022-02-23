@@ -55,7 +55,7 @@ fun FavPokemonsScreen(
                 contentDescription = "Pokemon",
                 modifier = Modifier
                     .fillMaxWidth()
-                    .align(Alignment.CenterHorizontally)
+                    .align(CenterHorizontally)
             )
             Spacer(modifier = Modifier.height(16.dp))
             PokemonList(navController = navController)

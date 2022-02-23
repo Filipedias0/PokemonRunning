@@ -5,8 +5,10 @@ import android.app.*
 import android.app.PendingIntent.FLAG_UPDATE_CURRENT
 import android.content.Context
 import android.content.Intent
+import android.graphics.Bitmap
 import android.graphics.BitmapFactory
-import android.graphics.Color
+import android.graphics.drawable.BitmapDrawable
+import android.graphics.drawable.Drawable
 import android.graphics.drawable.Icon
 import android.location.Location
 import android.os.Build
@@ -15,13 +17,22 @@ import android.util.Log
 import android.widget.Toast
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.PlayArrow
+import androidx.compose.runtime.livedata.observeAsState
+import androidx.compose.ui.graphics.Color
+import androidx.compose.ui.platform.LocalLifecycleOwner
 import androidx.core.app.NotificationCompat
 import androidx.lifecycle.LifecycleService
 import androidx.lifecycle.MutableLiveData
 import androidx.lifecycle.Observer
+import androidx.palette.graphics.Palette
+import coil.ImageLoader
+import coil.annotation.ExperimentalCoilApi
+import coil.request.ImageRequest
 import com.example.pokedexapp.MainActivity
 import com.example.pokedexapp.R
+import com.example.pokedexapp.data.models.PokedexListEntry
 import com.example.pokedexapp.other.TrackingUtility
+import com.example.pokedexapp.repository.PokemonRepository
 import com.example.pokedexapp.util.constants.Constants.ACTION_PAUSE_SERVICE
 import com.example.pokedexapp.util.constants.Constants.ACTION_START_OR_RESUME_SERVICE
 import com.example.pokedexapp.util.constants.Constants.ACTION_STOP_SERVICE
@@ -41,17 +52,13 @@ import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.delay
 import kotlinx.coroutines.launch
+import timber.log.Timber
 import javax.inject.Inject
 
 const val INTENT_COMMAND = "Command"
-const val INTENT_COMMAND_EXIT = "Exit"
 const val INTENT_COMMAND_REPLY = "Reply"
-const val INTENT_COMMAND_ACHIEVE = "Achieve"
 
 private const val CODE_FOREGROUND_SERVICE = 1
-private const val CODE_REPLY_INTENT = 2
-private const val CODE_ACHIEVE_INTENT = 3
-
 
 typealias Polyline = MutableList<LatLng>
 typealias Polylines = MutableList<Polyline>
@@ -61,6 +68,8 @@ class TrackingService : LifecycleService() {
     private var isFirstRun = true
     private var resuming = false
     private var serviceKilled = false
+    private val notificationImage = MutableLiveData<Bitmap>()
+    private val dominantColor = MutableLiveData<Int>()
 
     @Inject
     lateinit var  fusedLocationProviderClient: FusedLocationProviderClient
@@ -71,6 +80,36 @@ class TrackingService : LifecycleService() {
     lateinit var baseNotificationBuilder: NotificationCompat.Builder
 
     lateinit var curNoticationBuilder: NotificationCompat.Builder
+
+    @Inject
+    lateinit var repository: PokemonRepository
+
+    @ExperimentalCoilApi
+    private fun loadNotificationImage(
+        context: Context,
+    ) {
+        val favoritePokemonsLiveData = repository.observeFavPokemons()
+        favoritePokemonsLiveData.observe(this, { list ->
+            val randomPokemon = (list.indices).random() // generated random from 0 to last indice included
+            val url = "https://raw.githubusercontent.com/PokeAPI/sprites/master/sprites/pokemon/other/official-artwork/${list[randomPokemon].number}.png"
+
+            val imageLoader = ImageLoader.Builder(context)
+                .availableMemoryPercentage(0.25)
+                .crossfade(true)
+                .build()
+
+            val request = ImageRequest.Builder(context)
+                .data(url)
+                .target{
+                    val bmp = (it as BitmapDrawable).bitmap.copy(Bitmap.Config.ARGB_8888, true)
+                    notificationImage.postValue(bmp)
+                }
+                .build()
+
+            imageLoader.enqueue(request)
+        })
+
+    }
 
     companion object{
         val timeRunInMillis = MutableLiveData<Long>()
@@ -95,8 +134,22 @@ class TrackingService : LifecycleService() {
         stopSelf()
     }
 
+    fun calcDominantColor(
+        bmp: Bitmap,
+        onFinish: (Int) -> Unit
+    ) {
+        Palette.from(bmp).generate { pallete ->
+            pallete?.dominantSwatch?.rgb?.let { colorValue ->
+                onFinish(colorValue)
+            }
+        }
+    }
+
+    @ExperimentalCoilApi
     override fun onCreate() {
         super.onCreate()
+        val notificationManager = getSystemService(Context.NOTIFICATION_SERVICE) as NotificationManager
+        loadNotificationImage(this)
         curNoticationBuilder = baseNotificationBuilder
         postInitialValues()
         fusedLocationProviderClient = FusedLocationProviderClient(this)
@@ -105,11 +158,29 @@ class TrackingService : LifecycleService() {
             updateLocationTracking(it)
             updateNotificationTrackingState(it)
         })
+
+        notificationImage.observe(this, {
+           calcDominantColor(it){ intColor ->
+               dominantColor.postValue(intColor)
+           }
+
+            curNoticationBuilder = baseNotificationBuilder
+                .setLargeIcon(it)
+            notificationManager.notify(NOTIFICATION_ID, curNoticationBuilder.build())
+        })
+
+        dominantColor.observe(this, {
+            curNoticationBuilder = baseNotificationBuilder
+                .setColor(it)
+            notificationManager.notify(NOTIFICATION_ID, curNoticationBuilder.build())
+        })
     }
 
+    @ExperimentalCoilApi
     override fun onStartCommand(intent: Intent?, flags: Int, startId: Int): Int {
         super.onStartCommand(intent, flags, startId)
         val command = intent?.getStringExtra(INTENT_COMMAND)
+        loadNotificationImage(this)
 
         if(command == ACTION_START_OR_RESUME_SERVICE){
             if(isFirstRun) {

@@ -50,7 +50,6 @@ class DefaultPokemonRepository @Inject constructor(
 
     override suspend fun searchFavPokemons(pokemonName: String): List<PokedexListEntry> {
         return pokemonDao.searchFavoritePokemon(pokemonName)
-
     }
 
     override suspend fun deleteFavPokemon(pokemon: PokedexListEntry) {

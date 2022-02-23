@@ -4,12 +4,19 @@ import android.app.Notification
 import android.app.PendingIntent
 import android.content.Context
 import android.content.Intent
+import android.graphics.Bitmap
 import android.graphics.BitmapFactory
 import android.graphics.Color
+import android.graphics.drawable.BitmapDrawable
 import android.os.Build
+import androidx.compose.ui.platform.LocalContext
 import androidx.core.app.NotificationCompat
+import coil.ImageLoader
+import coil.compose.rememberImagePainter
+import coil.request.ImageRequest
 import com.example.pokedexapp.MainActivity
 import com.example.pokedexapp.R
+import com.example.pokedexapp.repository.PokemonRepository
 import com.example.pokedexapp.util.constants.Constants.NOTIFICATION_CHANNEL_GENERAL
 import com.google.android.gms.location.FusedLocationProviderClient
 import dagger.Module
@@ -48,7 +55,8 @@ object ServiceModule {
     @Provides
     fun provideBaseNotificationBuilder(
         @ApplicationContext app: Context,
-        pendingIntent: PendingIntent
+        pendingIntent: PendingIntent,
+        repository: PokemonRepository
     ) = NotificationCompat.Builder(app, NOTIFICATION_CHANNEL_GENERAL)
         .setTicker(null)
         .setContentTitle("Pokemon app")
@@ -57,11 +65,11 @@ object ServiceModule {
         .setOngoing(true)
         .setWhen(System.currentTimeMillis())
         .setSmallIcon(R.drawable.poke_ball_pin)
-        .setLargeIcon(BitmapFactory.decodeResource(app.resources,
-            R.drawable.poke_ball_pin
-            )
+        .setLargeIcon(BitmapFactory.decodeResource(
+            app.resources,
+            R.drawable.poke_ball_pin)
         )
-        .setColor(Color.parseColor("#f7da64"))
+        .setColor(Color.BLUE)
         .setColorized(true)
         .setStyle(androidx.media.app.NotificationCompat.DecoratedMediaCustomViewStyle())
         .setPriority(Notification.PRIORITY_MAX)
