@@ -1,9 +1,12 @@
 package com.example.pokedexapp.runningSection.startRunScreen
 
 import android.content.Context
+import android.graphics.Bitmap
+import android.graphics.drawable.BitmapDrawable
+import android.location.Location
+import android.location.LocationManager
 import android.os.Build
 import android.os.Bundle
-import android.util.Log
 import android.widget.Toast
 import android.widget.Toast.LENGTH_SHORT
 import androidx.annotation.RequiresApi
@@ -25,15 +28,16 @@ import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import androidx.compose.ui.viewinterop.AndroidView
+import androidx.core.graphics.drawable.toDrawable
 import androidx.hilt.navigation.compose.hiltViewModel
 import androidx.lifecycle.Lifecycle
 import androidx.lifecycle.LifecycleEventObserver
-import androidx.lifecycle.Observer
 import androidx.navigation.NavController
 import coil.ImageLoader
 import coil.compose.rememberImagePainter
 import coil.decode.GifDecoder
 import coil.decode.ImageDecoderDecoder
+import coil.request.ImageRequest
 import com.example.pokedexapp.R
 import com.example.pokedexapp.db.Run
 import com.example.pokedexapp.other.TrackingUtility
@@ -41,26 +45,26 @@ import com.example.pokedexapp.runningSection.service.TrackingService
 import com.example.pokedexapp.runningSection.service.sendCommandToService
 import com.example.pokedexapp.util.PermissionsHandler
 import com.example.pokedexapp.util.constants.Constants.ACTION_PAUSE_SERVICE
-import com.google.accompanist.permissions.ExperimentalPermissionsApi
-import com.google.android.libraries.maps.CameraUpdateFactory
-import com.google.android.libraries.maps.MapView
-import com.google.android.libraries.maps.model.PolylineOptions
-import com.google.maps.android.ktx.awaitMap
-import kotlinx.coroutines.CoroutineScope
-import kotlinx.coroutines.Dispatchers
-import kotlinx.coroutines.launch
 import com.example.pokedexapp.util.constants.Constants.ACTION_START_OR_RESUME_SERVICE
 import com.example.pokedexapp.util.constants.Constants.ACTION_STOP_SERVICE
 import com.example.pokedexapp.util.constants.Constants.MAP_ZOOM
 import com.example.pokedexapp.util.constants.Constants.POLYLINE_COLOR
 import com.example.pokedexapp.util.constants.Constants.POLYLINE_WIDTH
+import com.google.accompanist.permissions.ExperimentalPermissionsApi
+import com.google.android.libraries.maps.CameraUpdateFactory
 import com.google.android.libraries.maps.GoogleMap
+import com.google.android.libraries.maps.MapView
+import com.google.android.libraries.maps.model.BitmapDescriptorFactory
 import com.google.android.libraries.maps.model.LatLngBounds
-import dagger.hilt.android.AndroidEntryPoint
-import timber.log.Timber
+import com.google.android.libraries.maps.model.MarkerOptions
+import com.google.android.libraries.maps.model.PolylineOptions
+import com.google.maps.android.ktx.awaitMap
+import kotlinx.coroutines.CoroutineScope
+import kotlinx.coroutines.Dispatchers
+import kotlinx.coroutines.launch
 import java.util.*
-import javax.inject.Inject
 import kotlin.math.round
+
 
 @RequiresApi(Build.VERSION_CODES.Q)
 @ExperimentalPermissionsApi
@@ -71,21 +75,21 @@ fun StartRunScreen(
 ) {
     val showPermissionsDialog = remember { mutableStateOf(false) }
     val showFinishRunDialog = remember { mutableStateOf(false) }
-    var textTimer = remember { mutableStateOf("00:00:00") }
+    val textTimer = remember { mutableStateOf("00:00:00") }
     val lifecycleOwner = LocalLifecycleOwner.current
-    var curTimeInMillis = 0L
+    var curTimeInMillis: Long
+    val context = LocalContext.current
     StartRunViewModel.weight = viewModel.injectWeight
 
     fun subscribeToObservers() {
-        TrackingService.timeRunInMillis.observe(lifecycleOwner, {
+        TrackingService.timeRunInMillis.observe(lifecycleOwner) {
             curTimeInMillis = it
             val formattedTime = TrackingUtility.getFormattedStopWatchTime(curTimeInMillis, true)
             textTimer.value = formattedTime
-        })
+        }
 
         StartRunViewModel.saveRun.observe(lifecycleOwner){
             if(it != null) {
-                Timber.d(" Teste saveRun")
                 viewModel.insertRun(it)
                 StartRunViewModel.saveRun.postValue(null)
                 textTimer.value = "00:00:00:00"
@@ -93,6 +97,28 @@ fun StartRunScreen(
 
                 navController.popBackStack()
             }
+        }
+
+        viewModel.favPokemonsLiveData.observe(lifecycleOwner){ pokemonList ->
+            val randomPokemon = (pokemonList.indices).random()
+            val url = "https://raw.githubusercontent.com/PokeAPI/sprites/master/sprites/pokemon/" +
+                    "versions/generation-vii/icons/${pokemonList[randomPokemon].number}.png"
+
+            val imageLoader = ImageLoader.Builder(context)
+                .availableMemoryPercentage(0.25)
+                .crossfade(true)
+                .build()
+
+            val request = ImageRequest.Builder(context)
+                .data(url)
+                .target{
+                    val bmp = (it as BitmapDrawable).bitmap.copy(Bitmap.Config.ARGB_8888, true)
+                    StartRunViewModel.pokemonIconMarker.postValue(bmp)
+                }
+                .size(width = 160, height =  160)
+                .build()
+
+            imageLoader.enqueue(request)
         }
     }
 
@@ -156,7 +182,7 @@ fun RunningWrapper(
         MapHandler()
         context = LocalContext.current
 
-        var gifLoader = ImageLoader.Builder(LocalContext.current)
+        val gifLoader = ImageLoader.Builder(LocalContext.current)
             .componentRegistry {
                 if (Build.VERSION.SDK_INT >= 28) {
                     add(ImageDecoderDecoder(LocalContext.current))
@@ -236,7 +262,10 @@ fun MapHandler( ) {
 
     val context = LocalContext.current
     var curTimeInMillis = 0L
-
+    var userLocationMarker = map?.addMarker(
+        MarkerOptions()
+            .title("User Pokemon")
+    )
 
     fun zoomToSeeWholeTrack(){
         val bounds = LatLngBounds.Builder()
@@ -274,7 +303,7 @@ fun MapHandler( ) {
 
             StartRunViewModel.saveRun.postValue(run)
             Toast.makeText(
-                context, "Run saved succesfully!", LENGTH_SHORT
+                context, "Run saved successfully!", LENGTH_SHORT
             ).show()
             cancelRun()
         }
@@ -302,15 +331,24 @@ fun MapHandler( ) {
     }
 
     fun addLatestPolyline() {
-        //TODO the color of the polyline will be the predominant color of the favorite pokemon
         //TODO make the favorite pokemon run in the map ex
         // val markerOptions = MarkerOptions()
         //                    .title("PickupPosition")
         //                    .position(pickUp)
         //                map!!.addMarker(markerOptions)
+
+        //use the previously created marker
+
         if (pathPoints!!.isNotEmpty() && pathPoints!!.last().size > 1) {
-            val preLastLatLng = pathPoints!!.last()[pathPoints!!.last().size - 2]
             val lastLatLng = pathPoints!!.last().last()
+            val location = Location(LocationManager.GPS_PROVIDER)
+            location.latitude = lastLatLng.latitude
+            location.longitude = lastLatLng.longitude
+
+            userLocationMarker!!.position = (lastLatLng)
+            userLocationMarker!!.rotation = location.bearing
+
+            val preLastLatLng = pathPoints!!.last()[pathPoints!!.last().size - 2]
             val polylineOptions = PolylineOptions()
                 .color(POLYLINE_COLOR)
                 .width(POLYLINE_WIDTH)
@@ -321,23 +359,64 @@ fun MapHandler( ) {
     }
 
     fun subscribeToObservers(){
-        TrackingService.pathPoints.observe(lifecycleOwner, {
+        TrackingService.pathPoints.observe(lifecycleOwner) {
             addLatestPolyline()
             moveCameraToUser()
-        })
+
+            if (pathPoints!!.isNotEmpty() && pathPoints!!.last().size == 1) {
+                val lastLatLng = pathPoints!!.last().last()
+                val location = Location(LocationManager.GPS_PROVIDER)
+                location.latitude = lastLatLng.latitude
+                location.longitude = lastLatLng.longitude
+
+                //Create the marker that will be animated
+                val markerOptions =   MarkerOptions()
+                    .position(lastLatLng)
+                    .rotation(location.bearing)
+                    .anchor(0.5F, 0.5F)
+                    .icon(BitmapDescriptorFactory.fromBitmap(
+                        StartRunViewModel.pokemonIconMarker.value)
+                    )
+
+                userLocationMarker = map?.addMarker(markerOptions)!!
+
+                val imageLoader = ImageLoader.Builder(context)
+                    .availableMemoryPercentage(0.25)
+                    .crossfade(true)
+                    .build()
+
+                val request = ImageRequest.Builder(context)
+                    .data(R.drawable.poke_ball_pin)
+                    .target{
+                        val bmp = (it as BitmapDrawable).bitmap.copy(Bitmap.Config.ARGB_8888, true)
+                        StartRunViewModel.pokemonIconMarker.postValue(bmp)
+
+                        map?.addMarker(
+                            MarkerOptions().position(lastLatLng)
+                                .title("Starting point marker")
+                                .icon(BitmapDescriptorFactory.fromBitmap(bmp))
+                        )
+                    }
+                    .size(width = 80, height =  80)
+                    .build()
+
+                imageLoader.enqueue(request)
+
+
+            }
+        }
 
         TrackingService.endRunAndSaveIntoDb.observe(lifecycleOwner){
             if(it == true) {
-                Timber.d("Teste EndRun")
                 zoomToSeeWholeTrack()
                 endRunAndSaveToDb()
                 TrackingService.endRunAndSaveIntoDb.postValue(false)
             }
         }
 
-        TrackingService.timeRunInMillis.observe(lifecycleOwner, Observer {
+        TrackingService.timeRunInMillis.observe(lifecycleOwner) {
             curTimeInMillis = it
-        })
+        }
     }
 
     Column(

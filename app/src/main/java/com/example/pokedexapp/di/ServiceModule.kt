@@ -69,7 +69,7 @@ object ServiceModule {
             app.resources,
             R.drawable.poke_ball_pin)
         )
-        .setColor(Color.BLUE)
+        .setColor(Color.WHITE)
         .setColorized(true)
         .setStyle(androidx.media.app.NotificationCompat.DecoratedMediaCustomViewStyle())
         .setPriority(Notification.PRIORITY_MAX)

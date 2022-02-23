@@ -100,26 +100,26 @@ fun RunningWrapper(
     navController: NavController,
     viewModel: RunsViewModel,
 ) {
-    var sortByState = remember { mutableStateOf(viewModel.sortByState) }
-    var sortByText = viewModel.sortByState.observeAsState()
-    val options = listOf("Date", "Distance", "Runing time", "Avg Speed", "Calories burned")
+    val sortByState = remember { mutableStateOf(viewModel.sortByState) }
+    val sortByText = viewModel.sortByState.observeAsState()
+    val options = listOf("Date", "Distance", "Running time", "Avg Speed", "Calories burned")
     var runs : List<Run> = listOf()
     val lifecycleOwner = LocalLifecycleOwner.current
 
     fun subscribeToObservers(){
-        sortByState.value.observe(lifecycleOwner, { sortBy ->
-            when(sortBy){
+        sortByState.value.observe(lifecycleOwner) { sortBy ->
+            when (sortBy) {
                 options[0] -> viewModel.sortRuns(SortType.DATE)
                 options[1] -> viewModel.sortRuns(SortType.DISTANCE)
                 options[2] -> viewModel.sortRuns(SortType.RUNNING_TIME)
                 options[3] -> viewModel.sortRuns(SortType.AVG_SPEED)
                 options[4] -> viewModel.sortRuns(SortType.CALORIES_BURNED)
             }
-        })
+        }
 
-        viewModel.runs.observe(lifecycleOwner, {
+        viewModel.runs.observe(lifecycleOwner) {
             runs = it
-        })
+        }
     }
 
     Column(
@@ -133,8 +133,7 @@ fun RunningWrapper(
             text = "Sort By: ${sortByText.value}",
             options = options,
             sortByState = sortByState.value,
-            modifier = Modifier,
-            navControler = navController
+            navController = navController
         )
 
         LazyColumn(
@@ -182,11 +181,10 @@ fun RunningWrapper(
 @Composable
 fun DropDownRow(
     text: String,
-    modifier: Modifier = Modifier,
     initiallyOpened: Boolean = false,
     options: List<String>,
     sortByState: MutableLiveData<String>,
-    navControler: NavController
+    navController: NavController
 ) {
     var isOpen by remember {
         mutableStateOf(initiallyOpened)
@@ -213,9 +211,9 @@ fun DropDownRow(
             .fillMaxWidth()
     ) {
 
-        Column(){
+        Column {
 
-        Row(){
+        Row {
 
             Column(
                 horizontalAlignment = Start,
@@ -270,7 +268,7 @@ fun DropDownRow(
                     modifier = Modifier
                         .size(36.dp)
                         .clickable {
-                            navControler.navigate("settings_screen")
+                            navController.navigate("settings_screen")
                         }
                 )
 
@@ -281,7 +279,7 @@ fun DropDownRow(
                     modifier = Modifier
                         .size(36.dp)
                         .clickable {
-                            navControler.navigate("statistics_screen")
+                            navController.navigate("statistics_screen")
                         }
                 )
 

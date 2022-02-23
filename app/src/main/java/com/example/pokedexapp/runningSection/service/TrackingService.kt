@@ -1,58 +1,49 @@
 package com.example.pokedexapp.runningSection.service
 
 import android.annotation.SuppressLint
-import android.app.*
+import android.app.Notification
+import android.app.NotificationChannel
+import android.app.NotificationManager
+import android.app.PendingIntent
 import android.app.PendingIntent.FLAG_UPDATE_CURRENT
 import android.content.Context
 import android.content.Intent
 import android.graphics.Bitmap
-import android.graphics.BitmapFactory
 import android.graphics.drawable.BitmapDrawable
-import android.graphics.drawable.Drawable
-import android.graphics.drawable.Icon
 import android.location.Location
 import android.os.Build
 import android.os.Looper
 import android.util.Log
 import android.widget.Toast
-import androidx.compose.material.icons.Icons
-import androidx.compose.material.icons.filled.PlayArrow
-import androidx.compose.runtime.livedata.observeAsState
-import androidx.compose.ui.graphics.Color
-import androidx.compose.ui.platform.LocalLifecycleOwner
 import androidx.core.app.NotificationCompat
 import androidx.lifecycle.LifecycleService
 import androidx.lifecycle.MutableLiveData
-import androidx.lifecycle.Observer
 import androidx.palette.graphics.Palette
 import coil.ImageLoader
 import coil.annotation.ExperimentalCoilApi
 import coil.request.ImageRequest
-import com.example.pokedexapp.MainActivity
 import com.example.pokedexapp.R
-import com.example.pokedexapp.data.models.PokedexListEntry
 import com.example.pokedexapp.other.TrackingUtility
 import com.example.pokedexapp.repository.PokemonRepository
 import com.example.pokedexapp.util.constants.Constants.ACTION_PAUSE_SERVICE
 import com.example.pokedexapp.util.constants.Constants.ACTION_START_OR_RESUME_SERVICE
 import com.example.pokedexapp.util.constants.Constants.ACTION_STOP_SERVICE
-import com.google.android.gms.location.LocationCallback
-import com.google.android.gms.location.LocationRequest
-import com.google.android.gms.location.LocationResult
-import com.google.android.libraries.maps.model.LatLng
 import com.example.pokedexapp.util.constants.Constants.FASTEST_LOCATION_INTERVAL
 import com.example.pokedexapp.util.constants.Constants.LOCATION_UPDATE_INTERVAL
 import com.example.pokedexapp.util.constants.Constants.NOTIFICATION_CHANNEL_GENERAL
 import com.example.pokedexapp.util.constants.Constants.NOTIFICATION_ID
 import com.example.pokedexapp.util.constants.Constants.TIMER_UPDATE_INTERVAL
 import com.google.android.gms.location.FusedLocationProviderClient
+import com.google.android.gms.location.LocationCallback
+import com.google.android.gms.location.LocationRequest
 import com.google.android.gms.location.LocationRequest.PRIORITY_HIGH_ACCURACY
+import com.google.android.gms.location.LocationResult
+import com.google.android.libraries.maps.model.LatLng
 import dagger.hilt.android.AndroidEntryPoint
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.delay
 import kotlinx.coroutines.launch
-import timber.log.Timber
 import javax.inject.Inject
 
 const val INTENT_COMMAND = "Command"
@@ -79,7 +70,7 @@ class TrackingService : LifecycleService() {
     @Inject
     lateinit var baseNotificationBuilder: NotificationCompat.Builder
 
-    lateinit var curNoticationBuilder: NotificationCompat.Builder
+    private lateinit var curNotificationBuilder: NotificationCompat.Builder
 
     @Inject
     lateinit var repository: PokemonRepository
@@ -89,9 +80,11 @@ class TrackingService : LifecycleService() {
         context: Context,
     ) {
         val favoritePokemonsLiveData = repository.observeFavPokemons()
-        favoritePokemonsLiveData.observe(this, { list ->
-            val randomPokemon = (list.indices).random() // generated random from 0 to last indice included
-            val url = "https://raw.githubusercontent.com/PokeAPI/sprites/master/sprites/pokemon/other/official-artwork/${list[randomPokemon].number}.png"
+        favoritePokemonsLiveData.observe(this) { list ->
+            // generated random from 0 to last indices included
+            val randomPokemon = (list.indices).random()
+            val url =
+                "https://raw.githubusercontent.com/PokeAPI/sprites/master/sprites/pokemon/other/official-artwork/${list[randomPokemon].number}.png"
 
             val imageLoader = ImageLoader.Builder(context)
                 .availableMemoryPercentage(0.25)
@@ -100,14 +93,14 @@ class TrackingService : LifecycleService() {
 
             val request = ImageRequest.Builder(context)
                 .data(url)
-                .target{
+                .target {
                     val bmp = (it as BitmapDrawable).bitmap.copy(Bitmap.Config.ARGB_8888, true)
                     notificationImage.postValue(bmp)
                 }
                 .build()
 
             imageLoader.enqueue(request)
-        })
+        }
 
     }
 
@@ -134,49 +127,49 @@ class TrackingService : LifecycleService() {
         stopSelf()
     }
 
-    fun calcDominantColor(
+    private fun calcDominantColor(
         bmp: Bitmap,
         onFinish: (Int) -> Unit
     ) {
-        Palette.from(bmp).generate { pallete ->
-            pallete?.dominantSwatch?.rgb?.let { colorValue ->
+        Palette.from(bmp).generate { palette ->
+            palette?.dominantSwatch?.rgb?.let { colorValue ->
                 onFinish(colorValue)
             }
         }
     }
 
-    @ExperimentalCoilApi
+    @OptIn(ExperimentalCoilApi::class)
     override fun onCreate() {
         super.onCreate()
         val notificationManager = getSystemService(Context.NOTIFICATION_SERVICE) as NotificationManager
         loadNotificationImage(this)
-        curNoticationBuilder = baseNotificationBuilder
+        curNotificationBuilder = baseNotificationBuilder
         postInitialValues()
         fusedLocationProviderClient = FusedLocationProviderClient(this)
 
-        isTracking.observe(this, Observer {
+        isTracking.observe(this) {
             updateLocationTracking(it)
             updateNotificationTrackingState(it)
-        })
+        }
 
-        notificationImage.observe(this, {
-           calcDominantColor(it){ intColor ->
-               dominantColor.postValue(intColor)
-           }
+        notificationImage.observe(this) {
+            calcDominantColor(it) { intColor ->
+                dominantColor.postValue(intColor)
+            }
 
-            curNoticationBuilder = baseNotificationBuilder
+            curNotificationBuilder = baseNotificationBuilder
                 .setLargeIcon(it)
-            notificationManager.notify(NOTIFICATION_ID, curNoticationBuilder.build())
-        })
+            notificationManager.notify(NOTIFICATION_ID, curNotificationBuilder.build())
+        }
 
-        dominantColor.observe(this, {
-            curNoticationBuilder = baseNotificationBuilder
+        dominantColor.observe(this) {
+            curNotificationBuilder = baseNotificationBuilder
                 .setColor(it)
-            notificationManager.notify(NOTIFICATION_ID, curNoticationBuilder.build())
-        })
+            notificationManager.notify(NOTIFICATION_ID, curNotificationBuilder.build())
+        }
     }
 
-    @ExperimentalCoilApi
+    @OptIn(ExperimentalCoilApi::class)
     override fun onStartCommand(intent: Intent?, flags: Int, startId: Int): Int {
         super.onStartCommand(intent, flags, startId)
         val command = intent?.getStringExtra(INTENT_COMMAND)
@@ -258,14 +251,14 @@ class TrackingService : LifecycleService() {
 
         val notificationManager = getSystemService(Context.NOTIFICATION_SERVICE) as NotificationManager
 
-        curNoticationBuilder.javaClass.getDeclaredField("mActions").apply {
+        curNotificationBuilder.javaClass.getDeclaredField("mActions").apply {
             isAccessible = true
-            set(curNoticationBuilder, ArrayList<NotificationCompat.Action>())
+            set(curNotificationBuilder, ArrayList<NotificationCompat.Action>())
         }
         if(!serviceKilled){
-            curNoticationBuilder = baseNotificationBuilder
+            curNotificationBuilder = baseNotificationBuilder
                 .addAction(R.drawable.ic_pause_black_24dp, notificationActionText, pendingIntent)
-            notificationManager.notify(NOTIFICATION_ID, curNoticationBuilder.build())
+            notificationManager.notify(NOTIFICATION_ID, curNotificationBuilder.build())
         }
     }
 
@@ -360,13 +353,13 @@ class TrackingService : LifecycleService() {
 
             startForeground(CODE_FOREGROUND_SERVICE, baseNotificationBuilder.build())
 
-            timeRunInSeconds.observe(this, Observer {
-                if(!serviceKilled){
-                    val notification = curNoticationBuilder
+            timeRunInSeconds.observe(this) {
+                if (!serviceKilled) {
+                    val notification = curNotificationBuilder
                         .setContentText(TrackingUtility.getFormattedStopWatchTime(it * 1000L))
                     notificationManager.notify(NOTIFICATION_ID, notification.build())
                 }
-            })
-        }
+            }
+    }
     }
 
