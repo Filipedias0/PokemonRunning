@@ -380,6 +380,8 @@ fun MapHandler( ) {
 
                 userLocationMarker = map?.addMarker(markerOptions)!!
 
+                //Starting point marker
+
                 val imageLoader = ImageLoader.Builder(context)
                     .availableMemoryPercentage(0.25)
                     .crossfade(true)
@@ -389,7 +391,6 @@ fun MapHandler( ) {
                     .data(R.drawable.poke_ball_pin)
                     .target{
                         val bmp = (it as BitmapDrawable).bitmap.copy(Bitmap.Config.ARGB_8888, true)
-                        StartRunViewModel.pokemonIconMarker.postValue(bmp)
 
                         map?.addMarker(
                             MarkerOptions().position(lastLatLng)
