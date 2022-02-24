@@ -21,6 +21,7 @@ import androidx.compose.material.icons.filled.Settings
 import androidx.compose.runtime.*
 import androidx.compose.runtime.livedata.observeAsState
 import androidx.compose.ui.Alignment
+import androidx.compose.ui.Alignment.Companion.Center
 import androidx.compose.ui.Alignment.Companion.Start
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.alpha
@@ -37,6 +38,7 @@ import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
+import androidx.compose.ui.zIndex
 import androidx.hilt.navigation.compose.hiltViewModel
 import androidx.lifecycle.MutableLiveData
 import androidx.navigation.NavController
@@ -67,12 +69,13 @@ fun RunsScreen(
                 .fillMaxSize()
                 .padding(top = 20.dp)
         ) {
-            Image(
-                painter = painterResource(id = R.drawable.ic_international_pok_mon_logo),
-                contentDescription = "Pokemon",
-                modifier = Modifier
-                    .fillMaxWidth()
-            )
+                Image(
+                    painter = painterResource(id = R.drawable.ic_international_pok_mon_logo),
+                    contentDescription = "Pokemon",
+                    modifier = Modifier
+                        .fillMaxWidth()
+                )
+
             Spacer(modifier = Modifier.height(16.dp))
 
             PermissionsHandler(showAlert = showAlert, false)
@@ -91,6 +94,7 @@ fun RunsScreen(
                 navController = navController,
                 viewModel = viewModel
             )
+            Spacer(modifier = Modifier.height(12.dp))
         }
     }
 }
@@ -138,36 +142,43 @@ fun RunningWrapper(
             CircularProgressIndicator(
                 color = MaterialTheme.colors.primary,
                 modifier = Modifier
-                    .padding(20.dp)
-                    .padding(top= 120.dp)
+                    .offset(y = 120.dp)
                     .fillMaxWidth(0.5f)
                     .fillMaxHeight(0.5f)
             )
         }
 
-        LazyColumn(
-            contentPadding = PaddingValues(16.dp),
+        Box(
+            contentAlignment = Center,
             modifier = Modifier
                 .fillMaxWidth()
-                .fillMaxHeight(0.8F)
+                .fillMaxHeight()
+                .padding(vertical = 12.dp)
         ){
-
-            items(runs){ item ->
-                RunSection(item)
-                Spacer(modifier = Modifier.height(22.dp))
-            }
-        }
-
-        Box(
-            contentAlignment = Alignment.BottomCenter,
-            modifier = Modifier
-                .fillMaxSize()
-                .padding(bottom = 22.dp)
-        ){
-            Row(
-                horizontalArrangement = Arrangement.End,
+            LazyColumn(
                 modifier = Modifier
                     .fillMaxWidth()
+                    .fillMaxHeight()
+            ){
+
+                items(runs){ item ->
+                    RunSection(item)
+                    Spacer(modifier = Modifier.height(22.dp))
+                    if(runs.last() == item){
+                        Spacer(modifier = Modifier.height(50.dp))
+                    }
+                }
+            }
+
+            Row(
+                horizontalArrangement = Arrangement.End,
+                verticalAlignment = Alignment.Bottom,
+                modifier = Modifier
+                    .fillMaxSize()
+                    .padding(
+                        bottom = 12.dp,
+                        end = 6.dp
+                    )
             ) {
                 FloatingActionButton(
                     elevation = FloatingActionButtonDefaults.elevation(12.dp, 12.dp),
@@ -179,6 +190,7 @@ fun RunningWrapper(
                     backgroundColor = Color(255, 203, 8),
                     contentColor = Color(0,103,180),
                     modifier = Modifier
+                        .zIndex(2f)
                 ) {
                     Icon(imageVector = Icons.Default.Add, contentDescription = "Run")
                 }
