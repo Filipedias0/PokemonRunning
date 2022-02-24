@@ -42,5 +42,6 @@ class StartRunViewModel @Inject constructor(
         var saveRun = MutableLiveData<Run>(null)
         var weight = 80F
         val pokemonIconMarker = MutableLiveData<Bitmap>()
+        val pokemonNumber = MutableLiveData<Int>()
     }
 }

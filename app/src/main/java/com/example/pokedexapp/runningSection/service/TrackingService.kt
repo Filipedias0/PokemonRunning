@@ -15,6 +15,7 @@ import android.os.Build
 import android.os.Looper
 import android.util.Log
 import android.widget.Toast
+import androidx.compose.ui.platform.LocalContext
 import androidx.core.app.NotificationCompat
 import androidx.lifecycle.LifecycleService
 import androidx.lifecycle.MutableLiveData
@@ -25,6 +26,7 @@ import coil.request.ImageRequest
 import com.example.pokedexapp.R
 import com.example.pokedexapp.other.TrackingUtility
 import com.example.pokedexapp.repository.PokemonRepository
+import com.example.pokedexapp.runningSection.startRunScreen.StartRunViewModel
 import com.example.pokedexapp.util.constants.Constants.ACTION_PAUSE_SERVICE
 import com.example.pokedexapp.util.constants.Constants.ACTION_START_OR_RESUME_SERVICE
 import com.example.pokedexapp.util.constants.Constants.ACTION_STOP_SERVICE
@@ -78,13 +80,11 @@ class TrackingService : LifecycleService() {
     @ExperimentalCoilApi
     private fun loadNotificationImage(
         context: Context,
+        pokemonNumber: Int
     ) {
-        val favoritePokemonsLiveData = repository.observeFavPokemons()
-        favoritePokemonsLiveData.observe(this) { list ->
             // generated random from 0 to last indices included
-            val randomPokemon = (list.indices).random()
             val url =
-                "https://raw.githubusercontent.com/PokeAPI/sprites/master/sprites/pokemon/other/official-artwork/${list[randomPokemon].number}.png"
+                "https://raw.githubusercontent.com/PokeAPI/sprites/master/sprites/pokemon/other/official-artwork/${pokemonNumber}.png"
 
             val imageLoader = ImageLoader.Builder(context)
                 .availableMemoryPercentage(0.25)
@@ -100,8 +100,6 @@ class TrackingService : LifecycleService() {
                 .build()
 
             imageLoader.enqueue(request)
-        }
-
     }
 
     companion object{
@@ -139,13 +137,8 @@ class TrackingService : LifecycleService() {
     }
 
     @OptIn(ExperimentalCoilApi::class)
-    override fun onCreate() {
-        super.onCreate()
+    private fun subscribeToObservers(context: Context){
         val notificationManager = getSystemService(Context.NOTIFICATION_SERVICE) as NotificationManager
-        loadNotificationImage(this)
-        curNotificationBuilder = baseNotificationBuilder
-        postInitialValues()
-        fusedLocationProviderClient = FusedLocationProviderClient(this)
 
         isTracking.observe(this) {
             updateLocationTracking(it)
@@ -167,13 +160,27 @@ class TrackingService : LifecycleService() {
                 .setColor(it)
             notificationManager.notify(NOTIFICATION_ID, curNotificationBuilder.build())
         }
+
+        StartRunViewModel.pokemonNumber.observe(this){
+            loadNotificationImage(context, it)
+        }
+    }
+
+    @OptIn(ExperimentalCoilApi::class)
+    override fun onCreate() {
+        super.onCreate()
+        val context = this.applicationContext
+        curNotificationBuilder = baseNotificationBuilder
+        postInitialValues()
+        fusedLocationProviderClient = FusedLocationProviderClient(this)
+
+       subscribeToObservers(context)
     }
 
     @OptIn(ExperimentalCoilApi::class)
     override fun onStartCommand(intent: Intent?, flags: Int, startId: Int): Int {
         super.onStartCommand(intent, flags, startId)
         val command = intent?.getStringExtra(INTENT_COMMAND)
-        loadNotificationImage(this)
 
         if(command == ACTION_START_OR_RESUME_SERVICE){
             if(isFirstRun) {
