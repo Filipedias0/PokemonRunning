@@ -221,7 +221,7 @@ fun SplashScreen(
                 }
             )
         )
-        delay(3000L)
+        delay(1000L)
         navController.navigate("pokemon_list_screen")
     }
     Box(

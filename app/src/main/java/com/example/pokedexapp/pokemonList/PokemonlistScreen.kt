@@ -3,6 +3,7 @@ package com.example.pokedexapp.pokemonList
 import android.util.Log
 import androidx.compose.foundation.Image
 import androidx.compose.foundation.background
+import androidx.compose.foundation.border
 import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.*
 import androidx.compose.foundation.lazy.LazyColumn
@@ -36,9 +37,12 @@ import com.example.pokedexapp.R
 import com.example.pokedexapp.data.models.PokedexListEntry
 import com.plcoding.jetpackcomposepokedex.ui.theme.RobotoCondensed
 import androidx.compose.material.*
+import androidx.compose.ui.Alignment
 import androidx.hilt.navigation.compose.hiltViewModel
+import androidx.palette.graphics.Palette
 import kotlinx.coroutines.delay
 import kotlinx.coroutines.launch
+import timber.log.Timber
 
 @Composable
 fun PokemonListScreen(
@@ -58,16 +62,12 @@ fun PokemonListScreen(
                     .fillMaxWidth()
                     .align(CenterHorizontally)
             )
-            SearchBar(
-                hint = "Search...",
-                modifier = Modifier
-                    .fillMaxWidth()
-                    .padding(16.dp)
-            ) {
-                    viewModel.searchPokemonList(it)
-            }
+
             Spacer(modifier = Modifier.height(16.dp))
+
             PokemonList(navController = navController)
+
+            Spacer(modifier = Modifier.height(20.dp))
         }
     }
 }
@@ -99,6 +99,11 @@ fun SearchBar(
                 .fillMaxWidth()
                 .shadow(5.dp, CircleShape)
                 .background(Color.White, CircleShape)
+                .border(
+                    width = 2.dp,
+                    color = Color(255, 203, 8),
+                    shape = CircleShape
+                )
                 .padding(horizontal = 20.dp, vertical = 12.dp)
                 .onFocusChanged {
                     isHintDisplayed = !it.isFocused && text.isEmpty()
@@ -141,6 +146,11 @@ fun PokedexEntry(
                         defaultDominantColor
                     )
                 )
+            )
+            .border(
+                width = 2.dp,
+                color = Color(255, 203, 8),
+                shape = RoundedCornerShape(10.dp)
             )
             .clickable {
                 navController.navigate(
@@ -196,32 +206,63 @@ fun PokemonList(
     val isLoading by remember { viewModel.isLoading }
     val isSearching by remember { viewModel.isSearching }
 
-    LazyColumn(contentPadding = PaddingValues(16.dp)){
-        val itemCount = if(pokemonList.size % 2 == 0){
-            pokemonList.size / 2
-        }else{
-            pokemonList.size /2 + 1
+    Column(
+        horizontalAlignment = CenterHorizontally,
+        verticalArrangement = Arrangement.Top,
+        modifier = Modifier
+            .fillMaxSize()
+            .padding(
+                start = 16.dp,
+                end = 16.dp,
+                bottom = 20.dp
+            )
+            .shadow(10.dp, RoundedCornerShape(10.dp))
+            .clip(RoundedCornerShape(10.dp))
+            .background(MaterialTheme.colors.secondary)
+    ){
+        SearchBar(
+            hint = "Search...",
+            modifier = Modifier
+                .fillMaxWidth()
+                .padding(
+                    start = 16.dp,
+                    top = 16.dp,
+                    end = 16.dp,
+                )
+        ) {
+            viewModel.searchPokemonList(it)
         }
-        items(itemCount){
-            if( it >= itemCount - 1 && !endReached && !isLoading && !isSearching){
-                LaunchedEffect(key1 = true){
-                    viewModel.loadPokemonPaginated()
-                }
+
+        LazyColumn(contentPadding = PaddingValues(
+            horizontal = 16.dp,
+            vertical = 12.dp
+        )){
+            val itemCount = if(pokemonList.size % 2 == 0){
+                pokemonList.size / 2
+            }else{
+                pokemonList.size /2 + 1
             }
-            PokedexRow(rowIndex = it, entries = pokemonList, navController = navController)
+            items(itemCount){
+                if( it >= itemCount - 1 && !endReached && !isLoading && !isSearching){
+                    LaunchedEffect(key1 = true){
+                        viewModel.loadPokemonPaginated()
+                    }
+                }
+                PokedexRow(rowIndex = it, entries = pokemonList, navController = navController)
+            }
         }
-    }
-    
-    Box(
-        contentAlignment = Center,
-        modifier = Modifier.fillMaxSize()
-    ) {
-        if(isLoading){
-            CircularProgressIndicator( color = MaterialTheme.colors.primary )
-        }
-        if(loadError != "Success" && !isLoading){
-            RetrySection(error = loadError) {
-                viewModel.pokemonList.value = viewModel.cachedPokemonList
+
+        Box(
+            contentAlignment = Center,
+            modifier = Modifier.fillMaxSize()
+        ) {
+            if(isLoading){
+                CircularProgressIndicator( color = MaterialTheme.colors.primary )
+            }
+            if(loadError != "Success" && !isLoading){
+                RetrySection(error = loadError) {
+                    viewModel.pokemonList.value = viewModel.cachedPokemonList
+                }
             }
         }
     }

@@ -3,6 +3,7 @@ package com.example.pokedexapp.pokemonList
 import android.graphics.Bitmap
 import android.graphics.drawable.BitmapDrawable
 import android.graphics.drawable.Drawable
+import androidx.compose.material.MaterialTheme
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.ui.graphics.Color
 import androidx.lifecycle.ViewModel
@@ -55,7 +56,7 @@ class PokemonListViewModel @Inject constructor(
             }
 
             isLoading.value = true
-            delay(500)
+            delay(100)
             repository.getPokemonInfo(query.lowercase(Locale.getDefault())).let {
 
                 if(loadStatus.value == "Success"){
@@ -132,7 +133,6 @@ class PokemonListViewModel @Inject constructor(
         onFinish: (Color) -> Unit
     ) {
         val bmp = (drawable as BitmapDrawable).bitmap.copy(Bitmap.Config.ARGB_8888, true)
-
 
         Palette.from(bmp).generate { pallete ->
             pallete?.dominantSwatch?.rgb?.let { colorValue ->

@@ -31,6 +31,7 @@ import androidx.navigation.NavController
 import com.example.pokedexapp.R
 import com.example.pokedexapp.favPokemons.FavPokemonsViewModel
 import com.example.pokedexapp.util.PermissionsHandler
+import com.example.pokedexapp.util.PokemonText
 import com.google.accompanist.permissions.ExperimentalPermissionsApi
 
 @RequiresApi(Build.VERSION_CODES.Q)
@@ -102,26 +103,21 @@ fun ContentWrapper(
         verticalArrangement = Arrangement.Top,
         modifier = modifier
     ) {
-        Text(
-            text = "Welcome!",
-            fontWeight = FontWeight.Bold,
-            color = Color(0,103,180),
-            textAlign = TextAlign.Center,
-            fontSize = 30.sp,
+        Spacer(modifier = Modifier.height(16.dp))
+
+        PokemonText(
+            text = "Welcome",
+            modifier = Modifier
+                .fillMaxWidth( 0.6f)
         )
+
+        Spacer(modifier = Modifier.height(32.dp))
 
         Image(
             painter = painterResource(R.drawable.poke_ball_pin),
             contentDescription = null,
-            modifier = Modifier.requiredSize(60.dp)
-        )
-
-        Text(
-            text = "Please enter your name and weight",
-            fontWeight = FontWeight.Bold,
-            color = Color(0,103,180),
-            textAlign = TextAlign.Center,
-            fontSize = 30.sp,
+            modifier = Modifier
+                .requiredSize(60.dp)
         )
 
         TextInput(
@@ -143,6 +139,8 @@ fun ContentWrapper(
         ) {
             textWeight = it.toFloat()
         }
+
+        Spacer(modifier = Modifier.height(16.dp))
 
         Button(
             modifier = Modifier
