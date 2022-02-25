@@ -100,8 +100,10 @@ fun StartRunScreen(
         }
 
         viewModel.favPokemonsLiveData.observe(lifecycleOwner){ pokemonList ->
-            val pokemonRandomizer = (pokemonList.indices).random()
-            val randomPokemonNumber = pokemonList[pokemonRandomizer].number
+
+            val randomPokemonNumber: Int = if(pokemonList.isEmpty()) 25
+            else pokemonList[(pokemonList.indices).random()].number
+
             StartRunViewModel.pokemonNumber.postValue(randomPokemonNumber)
             val url = "https://raw.githubusercontent.com/PokeAPI/sprites/master/sprites/pokemon/" +
                     "versions/generation-vii/icons/${randomPokemonNumber}.png"
