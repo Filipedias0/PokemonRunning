@@ -37,6 +37,7 @@ import coil.decode.ImageDecoderDecoder
 import com.example.pokedexapp.R
 import com.example.pokedexapp.favPokemons.FavPokemonsViewModel
 import com.example.pokedexapp.util.PermissionsHandler
+import com.example.pokedexapp.util.PokemonText
 import com.google.accompanist.permissions.ExperimentalPermissionsApi
 import dagger.hilt.android.AndroidEntryPoint
 import javax.inject.Inject
@@ -103,12 +104,11 @@ fun ContentWrapper(
         verticalArrangement = Arrangement.Top,
         modifier = modifier
     ) {
-        Text(
+        PokemonText(
             text = "Settings",
-            fontWeight = FontWeight.Bold,
-            color = Color(0,103,180),
-            textAlign = TextAlign.Center,
-            fontSize = 30.sp,
+            modifier = Modifier
+                .fillMaxWidth( 0.6f)
+                .padding(vertical = 16.dp)
         )
 
         var gifLoader = ImageLoader.Builder(LocalContext.current)
@@ -130,13 +130,14 @@ fun ContentWrapper(
                 .align(Alignment.CenterHorizontally)
         )
 
-        Text(
-            text = "Update name and weight",
-            fontWeight = FontWeight.Bold,
-            color = Color(0,103,180),
-            textAlign = TextAlign.Center,
-            fontSize = 30.sp,
+        PokemonText(
+            text = "Update your data",
+            modifier = Modifier
+                .fillMaxWidth()
+                .padding(vertical= 16.dp)
         )
+
+
 
         TextInput(
             hint = textName,
