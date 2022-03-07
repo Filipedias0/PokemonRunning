@@ -55,37 +55,17 @@ fun PermissionsDialog(
 @RequiresApi(Build.VERSION_CODES.Q)
 @ExperimentalPermissionsApi
 @Composable
-fun PermissionsHandler(showAlert: MutableState<Boolean>, background: Boolean) {
+fun PermissionsHandler(showAlert: MutableState<Boolean>) {
 
-    val permissions =
-        if (Build.VERSION.SDK_INT < Build.VERSION_CODES.Q || !background) {
-            listOf(
-                Manifest.permission.ACCESS_COARSE_LOCATION,
-                Manifest.permission.ACCESS_FINE_LOCATION
+    val permissions = (
+                listOf(
+                    Manifest.permission.ACCESS_COARSE_LOCATION,
+                    Manifest.permission.ACCESS_FINE_LOCATION
+                )
             )
-        } else {
-            listOf(
-                Manifest.permission.ACCESS_BACKGROUND_LOCATION,
-                Manifest.permission.ACCESS_COARSE_LOCATION,
-                Manifest.permission.ACCESS_FINE_LOCATION
-            )
-        }
-
-
-    val permissionsBack =
-        listOf(
-            Manifest.permission.ACCESS_BACKGROUND_LOCATION,
-            Manifest.permission.ACCESS_COARSE_LOCATION,
-            Manifest.permission.ACCESS_FINE_LOCATION
-        )
-
 
     val permissionsState = rememberMultiplePermissionsState(
         permissions = permissions
-    )
-
-    val permissionsBackState = rememberMultiplePermissionsState(
-        permissions = permissionsBack
     )
 
     PermissionsRequired(
@@ -119,38 +99,5 @@ fun PermissionsHandler(showAlert: MutableState<Boolean>, background: Boolean) {
         }
 
     ) {
-        if(showAlert.value){
-            PermissionsDialog(
-                state = showAlert,
-                onClick = {
-                    showAlert.value = false
-                    permissionsBackState.launchMultiplePermissionRequest()
-                },
-                title = "Welcome!"
-            ) {
-                Text(
-                    "This app uses permissions for location in background" +
-                            " to track your runs, please enable \"all the time\" in the settings to use the app!"
-                )
-            }
-        }
-    }
-
-    if(!permissionsBackState.allPermissionsGranted && permissionsState.allPermissionsGranted){
-        showAlert.value = true
-
-        PermissionsDialog(
-            state = showAlert,
-            onClick = {
-                showAlert.value = false
-                permissionsBackState.launchMultiplePermissionRequest()
-            },
-            title = "Welcome!"
-        ) {
-            Text(
-                "This app uses permissions for location in background" +
-                        " to track your runs, please enable \"all the time\" in the settings to use the app!"
-            )
-        }
     }
 }
