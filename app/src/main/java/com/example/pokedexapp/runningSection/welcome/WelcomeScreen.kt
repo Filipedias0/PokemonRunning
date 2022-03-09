@@ -48,7 +48,7 @@ fun WelcomeScreen(
         modifier = Modifier.fillMaxSize()
     ) {
         Column{
-            PermissionsHandler(showAlert = showAlert, false)
+            PermissionsHandler(showAlert = showAlert)
 
             Spacer(modifier = Modifier.height(20.dp))
             Image(

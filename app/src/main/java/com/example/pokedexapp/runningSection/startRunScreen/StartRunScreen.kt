@@ -130,7 +130,7 @@ fun StartRunScreen(
         color = MaterialTheme.colors.background,
         modifier = Modifier.fillMaxSize()
     ) {
-        PermissionsHandler(showAlert = showPermissionsDialog, false)
+        PermissionsHandler(showAlert = showPermissionsDialog)
         subscribeToObservers()
 
         if(showFinishRunDialog.value){

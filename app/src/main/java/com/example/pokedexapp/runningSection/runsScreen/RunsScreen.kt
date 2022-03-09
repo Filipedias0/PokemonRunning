@@ -78,7 +78,7 @@ fun RunsScreen(
 
             Spacer(modifier = Modifier.height(16.dp))
 
-            PermissionsHandler(showAlert = showAlert, false)
+            PermissionsHandler(showAlert = showAlert)
             RunningWrapper(
                 modifier = Modifier
                     .fillMaxSize()
