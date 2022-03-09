@@ -41,6 +41,7 @@ import com.example.pokedexapp.db.Run
 import com.example.pokedexapp.other.SortType
 import com.example.pokedexapp.other.TrackingUtility
 import com.example.pokedexapp.util.PermissionsHandler
+import com.example.pokedexapp.util.PokemonText
 import com.github.mikephil.charting.data.BarEntry
 import com.google.accompanist.permissions.ExperimentalPermissionsApi
 import java.lang.Math.round
@@ -103,13 +104,13 @@ fun RunningWrapper(
     } ?: "00:00:00"
     val totalAvgSpeed = viewModel.totalAvgSpeed.observeAsState().value?.let {
         val avgSpeed = (it * 10f).roundToInt() / 10f
-        "${avgSpeed}km/h"
+        "${avgSpeed} km/h"
     }
     val totalCaloriesBurned by viewModel.totalCaloriesBurned.observeAsState("0kcal")
     val totalDistance = viewModel.totalDistance.observeAsState().value?.let {
         val km = it / 1000f
         val totalDistance = (km * 10f).roundToInt() / 10f
-        "${totalDistance}km"
+        "${totalDistance} km"
     } ?: "0km"
     val runsSortedByDate by viewModel.runsSortedByDate.observeAsState()
 
@@ -131,11 +132,10 @@ fun RunningWrapper(
 
         val painter = rememberImagePainter(R.drawable.rapidash, gifLoader)
 
-        Text(
+        PokemonText(
             text = "Statistics",
-            fontSize = 42.sp,
-            fontWeight = FontWeight.Medium,
-            color = Color(255, 203, 8),
+            modifier = Modifier
+                .fillMaxWidth()
         )
 
         Spacer(Modifier.height(12.dp))
@@ -164,11 +164,10 @@ fun RunningWrapper(
                 horizontalAlignment = Alignment.CenterHorizontally
             ) {
 
-                Text(
+                PokemonText(
                     text = totalTime,
-                    fontSize = 32.sp,
-                    fontWeight = FontWeight.Medium,
-                    color = Color(255, 203, 8),
+                    modifier = Modifier
+                        .fillMaxWidth(0.5f)
                 )
 
                 Text(
@@ -185,11 +184,10 @@ fun RunningWrapper(
                 horizontalAlignment = Alignment.CenterHorizontally
             ) {
 
-                Text(
+                PokemonText(
                     text = totalDistance,
-                    fontSize = 32.sp,
-                    fontWeight = FontWeight.Medium,
-                    color = Color(255, 203, 8),
+                    modifier = Modifier
+                        .fillMaxWidth(0.5f)
                 )
 
                 Text(
@@ -213,11 +211,10 @@ fun RunningWrapper(
                 verticalArrangement = Arrangement.Top,
                 horizontalAlignment = Alignment.CenterHorizontally
             ) {
-                Text(
-                    text = totalCaloriesBurned.toString() + "kcal",
-                    fontSize = 32.sp,
-                    fontWeight = FontWeight.Medium,
-                    color = Color(255, 203, 8),
+                PokemonText(
+                    text = "$totalCaloriesBurned kcal",
+                    modifier = Modifier
+                        .fillMaxWidth(0.5f)
                 )
 
                 Text(
@@ -233,11 +230,10 @@ fun RunningWrapper(
                 horizontalAlignment = Alignment.CenterHorizontally
             ) {
 
-                Text(
+                PokemonText(
                     text = totalAvgSpeed.toString(),
-                    fontSize = 32.sp,
-                    fontWeight = FontWeight.Medium,
-                    color = Color(255, 203, 8),
+                    modifier = Modifier
+                        .fillMaxWidth(0.5f)
                 )
 
                 Text(
@@ -248,6 +244,7 @@ fun RunningWrapper(
                 )
             }
         }
+        Spacer(modifier = Modifier.height(10.dp))
         LineChartWithShadow(getDataPoints(viewModel))
     }
 }
@@ -279,7 +276,7 @@ fun LineChartWithShadow(
         val verticalAxisLineEndOffset = Offset(spacingOf16DpInPixels, height)
 
         drawLine(
-            Color.Gray,
+            Color(0,103,180),
             verticalAxisLineStartOffset,
             verticalAxisLineEndOffset,
             strokeWidth = Stroke.DefaultMiter
@@ -289,7 +286,7 @@ fun LineChartWithShadow(
         val horizontalAxisLineEndOffset = Offset(width - spacingOf16DpInPixels, height)
 
         drawLine(
-            Color.Gray,
+            Color(0,103,180),
             horizontalAxisLineStartOffset,
             horizontalAxisLineEndOffset,
             strokeWidth = Stroke.DefaultMiter
@@ -318,7 +315,7 @@ fun LineChartWithShadow(
                 val offsetEnd = Offset(nextNormXPoint, nextNormYPoint)
 
                 drawLine(
-                    Color(0xFFFF0000).copy(alpha = 0.5f),
+                    Color(0,103,180),
                     offsetStart,
                     offsetEnd,
                     strokeWidth = Stroke.DefaultMiter
@@ -326,7 +323,7 @@ fun LineChartWithShadow(
             }
 
             drawCircle(
-                Color(0xFFFF0000).copy(alpha = 0.5f),
+                Color(255, 203, 8),
                 radius = 6.dp.toPx(),
                 Offset(normX, normY)
             )
@@ -346,7 +343,7 @@ fun LineChartWithShadow(
             drawPath(
                 this,
                 brush = Brush.verticalGradient(colors = listOf(
-                    Color(0xFFFF0000).copy(alpha = 0.5f),
+                    Color(0,103,180),
                     Color(0xFFAFFFC)
                 ))
             )

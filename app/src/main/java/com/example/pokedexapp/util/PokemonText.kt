@@ -52,11 +52,6 @@ fun PokemonText(
         contentAlignment = Alignment.Center,
         modifier = modifier
             .padding(horizontal = 16.dp)
-            .shadow(60.dp, RoundedCornerShape(10.dp))
-            .clip(RoundedCornerShape(10.dp))
-            .background(
-                Color(255, 203, 8)
-            )
     ) {
         Canvas(
             modifier = Modifier
