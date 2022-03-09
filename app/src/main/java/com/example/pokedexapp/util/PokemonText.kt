@@ -22,6 +22,7 @@ import com.example.pokedexapp.R
 fun PokemonText(
     text: String,
     modifier: Modifier,
+    fontSize: Float = 84F
 ){
     val customTypefaceHollow = ResourcesCompat.getFont(LocalContext.current, R.font.pokemon_hollow)
     val customTypefaceFilled = ResourcesCompat.getFont(LocalContext.current, R.font.pokemon_solid)
@@ -29,7 +30,7 @@ fun PokemonText(
     val textPaintStroke = Paint().asFrameworkPaint().apply {
         isAntiAlias = true
         style = android.graphics.Paint.Style.STROKE
-        textSize = 84f
+        textSize = fontSize
         color = Color(0,103,180).hashCode()
         strokeWidth = 24f
         strokeMiter= 20f
@@ -42,7 +43,7 @@ fun PokemonText(
         textAlign = android.graphics.Paint.Align.CENTER
         isAntiAlias = true
         style = android.graphics.Paint.Style.FILL
-        textSize = 84f
+        textSize = fontSize
         color = Color(255, 203, 8).hashCode()
         typeface = customTypefaceFilled
     }

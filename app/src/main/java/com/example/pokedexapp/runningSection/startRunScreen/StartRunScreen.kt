@@ -12,6 +12,7 @@ import android.widget.Toast.LENGTH_SHORT
 import androidx.annotation.RequiresApi
 import androidx.compose.foundation.Image
 import androidx.compose.foundation.background
+import androidx.compose.foundation.border
 import androidx.compose.foundation.layout.*
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material.*
@@ -44,6 +45,7 @@ import com.example.pokedexapp.other.TrackingUtility
 import com.example.pokedexapp.runningSection.service.TrackingService
 import com.example.pokedexapp.runningSection.service.sendCommandToService
 import com.example.pokedexapp.util.PermissionsHandler
+import com.example.pokedexapp.util.PokemonText
 import com.example.pokedexapp.util.constants.Constants.ACTION_PAUSE_SERVICE
 import com.example.pokedexapp.util.constants.Constants.ACTION_START_OR_RESUME_SERVICE
 import com.example.pokedexapp.util.constants.Constants.ACTION_STOP_SERVICE
@@ -75,7 +77,7 @@ fun StartRunScreen(
 ) {
     val showPermissionsDialog = remember { mutableStateOf(false) }
     val showFinishRunDialog = remember { mutableStateOf(false) }
-    val textTimer = remember { mutableStateOf("00:00:00") }
+    val textTimer = remember { mutableStateOf("00:00:00:00") }
     val lifecycleOwner = LocalLifecycleOwner.current
     var curTimeInMillis: Long
     val context = LocalContext.current
@@ -151,6 +153,11 @@ fun StartRunScreen(
                     end = 16.dp,
                     bottom = 16.dp
                 )
+                .border(
+                    width = 2.dp,
+                    color = Color(255, 203, 8),
+                    shape = RoundedCornerShape(10.dp)
+                )
                 .shadow(10.dp, RoundedCornerShape(10.dp))
                 .clip(RoundedCornerShape(10.dp))
                 .background(MaterialTheme.colors.secondary),
@@ -205,30 +212,31 @@ fun RunningWrapper(
                 .align(Alignment.CenterHorizontally)
         )
 
-        Text(
+        Spacer(modifier = Modifier.height(10.dp))
+
+        PokemonText(
             text = textTimer.value,
-            fontSize = 48.sp,
-            fontWeight = FontWeight.Medium,
-            color = Color(0, 103, 180),
+            modifier = Modifier
+                .fillMaxWidth(),
+            fontSize = 94f
         )
 
         Button(
             modifier = Modifier
                 .fillMaxWidth(0.5f)
-                .offset(
-                    y = 30.dp
-                ),
+                .height(40.dp)
+                .offset(y = 20.dp),
             onClick = {
                 toggleRun()
             },
             shape = RoundedCornerShape(20.dp),
-            colors = ButtonDefaults.buttonColors(Color(255, 203, 8))
-        ) {
-            Text(
+            colors = ButtonDefaults.buttonColors(Color(255,203,8))){
+            PokemonText(
                 text = if(!isTracking) "Start" else "Stop",
-                fontSize = 18.sp,
-                fontWeight = FontWeight.Medium,
-                color = Color(0, 103, 180)
+                fontSize = 42f,
+                modifier = Modifier
+                    .fillMaxWidth()
+                    .absoluteOffset(y = (-18).dp)
             )
         }
 
@@ -236,6 +244,7 @@ fun RunningWrapper(
             Button(
                 modifier = Modifier
                     .fillMaxWidth(0.5f)
+                    .height(40.dp)
                     .offset(
                         y = 40.dp
                     ),
@@ -245,11 +254,12 @@ fun RunningWrapper(
                 shape = RoundedCornerShape(20.dp),
                 colors = ButtonDefaults.buttonColors(Color(255, 203, 8))
             ) {
-                Text(
+                PokemonText(
                     text = "Finish run",
-                    fontSize = 18.sp,
-                    fontWeight = FontWeight.Medium,
-                    color = Color(0, 103, 180)
+                    fontSize = 42f,
+                    modifier = Modifier
+                        .fillMaxWidth()
+                        .absoluteOffset(y = (-18).dp)
                 )
             }
         }

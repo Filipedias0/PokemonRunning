@@ -6,6 +6,7 @@ import android.widget.Toast
 import androidx.annotation.RequiresApi
 import androidx.compose.foundation.Image
 import androidx.compose.foundation.background
+import androidx.compose.foundation.border
 import androidx.compose.foundation.layout.*
 import androidx.compose.foundation.shape.CircleShape
 import androidx.compose.foundation.shape.RoundedCornerShape
@@ -71,6 +72,11 @@ fun SettingsScreen(
                         start = 16.dp,
                         end = 16.dp,
                         bottom = 16.dp
+                    )
+                    .border(
+                        width = 2.dp,
+                        color = Color(255, 203, 8),
+                        shape = RoundedCornerShape(10.dp)
                     )
                     .shadow(10.dp, RoundedCornerShape(10.dp))
                     .clip(RoundedCornerShape(10.dp))
@@ -161,17 +167,19 @@ fun ContentWrapper(
 
         Button(
             modifier = Modifier
-                .fillMaxWidth(0.5f),
+                .fillMaxWidth(0.5f)
+                .height(40.dp),
             onClick = {
                 updateSharedPref()
             },
             shape = RoundedCornerShape(20.dp),
             colors = ButtonDefaults.buttonColors(Color(255,203,8))){
-            Text(
+            PokemonText(
                 text = "Continue",
-                fontSize = 18.sp,
-                fontWeight = FontWeight.Medium,
-                color = Color(0,103,180)
+                fontSize = 42f,
+                modifier = Modifier
+                    .fillMaxWidth()
+                    .absoluteOffset(y = (-18).dp)
             )
         }
     }

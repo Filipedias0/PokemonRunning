@@ -86,6 +86,11 @@ fun PokemonList(
                 end = 16.dp,
                 bottom = 20.dp
             )
+            .border(
+                width = 2.dp,
+                color = Color(255, 203, 8),
+                shape = RoundedCornerShape(10.dp)
+            )
             .shadow(10.dp, RoundedCornerShape(10.dp))
             .clip(RoundedCornerShape(10.dp))
             .background(MaterialTheme.colors.secondary)

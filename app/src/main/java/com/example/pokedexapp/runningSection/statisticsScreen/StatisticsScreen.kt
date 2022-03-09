@@ -6,6 +6,7 @@ import androidx.annotation.RequiresApi
 import androidx.compose.foundation.Canvas
 import androidx.compose.foundation.Image
 import androidx.compose.foundation.background
+import androidx.compose.foundation.border
 import androidx.compose.foundation.layout.*
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material.*
@@ -83,6 +84,11 @@ fun StatisticsScreen(
                         start = 16.dp,
                         end = 16.dp,
                         bottom = 16.dp
+                    )
+                    .border(
+                        width = 2.dp,
+                        color = Color(255, 203, 8),
+                        shape = RoundedCornerShape(10.dp)
                     )
                     .shadow(10.dp, RoundedCornerShape(10.dp))
                     .clip(RoundedCornerShape(10.dp))

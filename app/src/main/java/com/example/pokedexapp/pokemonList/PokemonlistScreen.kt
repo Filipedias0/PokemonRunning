@@ -219,6 +219,11 @@ fun PokemonList(
             .shadow(10.dp, RoundedCornerShape(10.dp))
             .clip(RoundedCornerShape(10.dp))
             .background(MaterialTheme.colors.secondary)
+            .border(
+                width = 2.dp,
+                color = Color(255, 203, 8),
+                shape = RoundedCornerShape(10.dp)
+            )
     ){
         SearchBar(
             hint = "Search...",
