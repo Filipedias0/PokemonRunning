@@ -3,6 +3,7 @@ package com.example.pokedexapp.runningSection.welcome
 import android.content.Context
 import android.content.SharedPreferences
 import android.widget.Toast
+import androidx.compose.runtime.mutableStateOf
 import androidx.compose.ui.platform.LocalContext
 import androidx.lifecycle.LifecycleOwner
 import androidx.lifecycle.LiveData
@@ -30,7 +31,6 @@ import javax.inject.Inject
 class WelcomeScreenViewModel @Inject constructor(
     private val sharedPref: SharedPreferences
 ) : ViewModel() {
-
     fun writePersonalDataToSharedPref(userName: String, userWeight: Float, context: Context): Boolean {
         val name = userName
         val weight = userWeight

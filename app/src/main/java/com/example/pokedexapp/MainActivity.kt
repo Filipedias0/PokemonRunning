@@ -1,10 +1,9 @@
 package com.example.pokedexapp
 
-import android.media.Image
+import android.content.SharedPreferences
 import android.os.Build
 import android.os.Bundle
 import android.view.animation.OvershootInterpolator
-import android.window.SplashScreen
 import androidx.activity.ComponentActivity
 import androidx.activity.compose.setContent
 import androidx.annotation.RequiresApi
@@ -14,16 +13,13 @@ import androidx.compose.foundation.Image
 import androidx.compose.foundation.background
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.fillMaxSize
-import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.size
 import androidx.compose.material.*
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.Favorite
 import androidx.compose.material.icons.filled.Home
 import androidx.compose.material.icons.filled.Place
-import androidx.compose.runtime.Composable
-import androidx.compose.runtime.LaunchedEffect
-import androidx.compose.runtime.remember
+import androidx.compose.runtime.*
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.graphics.Color
 import androidx.navigation.compose.NavHost
@@ -45,6 +41,7 @@ import com.example.pokedexapp.runningSection.settingsScreen.SettingsScreen
 import com.example.pokedexapp.runningSection.startRunScreen.StartRunScreen
 import com.example.pokedexapp.runningSection.statisticsScreen.StatisticsScreen
 import com.example.pokedexapp.runningSection.welcome.WelcomeScreen
+import com.example.pokedexapp.util.constants.Constants.KEY_FIRST_TIME_TOGGLE
 import com.google.accompanist.permissions.ExperimentalPermissionsApi
 import kotlinx.coroutines.delay
 import java.util.*
@@ -52,9 +49,12 @@ import javax.inject.Inject
 
 @AndroidEntryPoint
 class MainActivity : ComponentActivity() {
-
     @set:Inject
-    var isFirstAppOpen = true
+    lateinit var sharedPref: SharedPreferences
+
+    private val isFirstAppOpen = mutableStateOf(true)
+
+
 
     @OptIn(ExperimentalPermissionsApi::class,
         ExperimentalMaterialApi::class
@@ -64,6 +64,7 @@ class MainActivity : ComponentActivity() {
         super.onCreate(savedInstanceState)
         setContent {
             val navController = rememberNavController()
+            isFirstAppOpen.value = sharedPref.getBoolean(KEY_FIRST_TIME_TOGGLE, true)
 
             PokedexAppTheme {
                 Scaffold(
@@ -82,7 +83,12 @@ class MainActivity : ComponentActivity() {
                                 ),
                                 BottomNavItem(
                                     name = "Run",
-                                    route = "welcome_screen",
+                                    route =
+                                    if(!isFirstAppOpen.value) {
+                                        "runs_screen"
+                                    }else{
+                                        "welcome_screen"
+                                    },
                                     icon = Icons.Default.Place
                                 )
                             ),
@@ -105,7 +111,7 @@ class MainActivity : ComponentActivity() {
 @RequiresApi(Build.VERSION_CODES.Q)
 @ExperimentalPermissionsApi
 @Composable
-fun Navigation(navController: NavHostController, isFirstAppOpen: Boolean){
+fun Navigation(navController: NavHostController, isFirstAppOpen: MutableState<Boolean>){
         NavHost(
             navController = navController,
             startDestination = "splash_screen"
@@ -147,14 +153,11 @@ fun Navigation(navController: NavHostController, isFirstAppOpen: Boolean){
             }
 
             composable("welcome_screen"){
-                if(isFirstAppOpen) {
                     WelcomeScreen(navController = navController)
-                }else{
-                    RunsScreen(navController = navController)
-                }
             }
 
             composable("runs_screen") {
+                isFirstAppOpen.value = false
                 RunsScreen(navController = navController)
             }
 
