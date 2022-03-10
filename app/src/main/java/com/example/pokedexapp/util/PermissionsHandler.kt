@@ -92,7 +92,7 @@ fun PermissionsHandler(showAlert: MutableState<Boolean>) {
             ) {
                 Text(
                     "This app uses permissions for location in background" +
-                            " to track your runs, please enable \"all the time\" in the settings to use the app!"
+                            " to track your runs, please enable it in the settings to use the app!"
                 )
             }
 
