@@ -86,12 +86,12 @@ fun ContentWrapper(
     navController: NavController,
     viewModel: WelcomeScreenViewModel
 ) {
-    var textWeight by rememberSaveable { mutableStateOf(0F) }
+    var textWeight by rememberSaveable { mutableStateOf("") }
     var textName by rememberSaveable { mutableStateOf("Text") }
     var context = LocalContext.current
 
     fun btnContinueOnClick(){
-        val success = viewModel.writePersonalDataToSharedPref(textName, textWeight, context)
+        val success = viewModel.writePersonalDataToSharedPref(textName, textWeight.toFloat(), context)
         if (success){
             navController.navigate(
                 "runs_screen"
@@ -138,7 +138,7 @@ fun ContentWrapper(
                 .fillMaxWidth()
                 .padding(16.dp)
         ) {
-            textWeight = it.toFloat()
+            textWeight = it
         }
 
         Spacer(modifier = Modifier.height(16.dp))

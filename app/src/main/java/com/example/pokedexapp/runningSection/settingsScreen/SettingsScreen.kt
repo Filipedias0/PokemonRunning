@@ -97,12 +97,12 @@ fun ContentWrapper(
     navController: NavController,
     viewModel: SettingsViewModel
 ) {
-    var textWeight by viewModel.weight
+    var textWeight = viewModel.weight.value.toString()
     var textName by viewModel.name
     var context = LocalContext.current
 
     fun updateSharedPref(){
-        viewModel.applyChangesToSharedPreferences(name = textName, weight = textWeight, context = context)
+        viewModel.applyChangesToSharedPreferences(name = textName, weight = textWeight.toFloat(), context = context)
     }
 
     Column(
@@ -162,7 +162,7 @@ fun ContentWrapper(
                 .fillMaxWidth()
                 .padding(16.dp)
         ) {
-            textWeight = it.toFloat()
+            textWeight = it
         }
 
         Button(
