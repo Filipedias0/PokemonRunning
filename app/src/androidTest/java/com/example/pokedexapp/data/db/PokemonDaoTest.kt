@@ -2,7 +2,6 @@ package com.example.pokedexapp.data.db
 
 import androidx.arch.core.executor.testing.InstantTaskExecutorRule
 import androidx.test.filters.MediumTest
-import androidx.test.filters.SmallTest
 import com.example.pokedexapp.data.models.PokedexListEntry
 import com.example.pokedexapp.db.PokemonDao
 import com.example.pokedexapp.db.PokemonDataBase

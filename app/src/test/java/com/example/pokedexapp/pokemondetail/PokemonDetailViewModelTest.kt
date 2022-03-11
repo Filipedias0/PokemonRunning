@@ -3,15 +3,12 @@ package com.example.pokedexapp.pokemondetail
 import androidx.arch.core.executor.testing.InstantTaskExecutorRule
 import com.example.pokedexapp.MainCoroutineRule
 import com.example.pokedexapp.data.models.PokedexListEntry
-import com.example.pokedexapp.pokemonList.PokemonListViewModel
 import com.example.pokedexapp.repository.FakePokemonRepository
-import com.getOrAwaitValueTest
+import com.example.pokedexapp.getOrAwaitValueTest
 import com.google.common.truth.Truth
 import kotlinx.coroutines.ExperimentalCoroutinesApi
 import kotlinx.coroutines.test.runBlockingTest
-import org.junit.Assert.*
 
-import org.junit.After
 import org.junit.Before
 import org.junit.Rule
 import org.junit.Test

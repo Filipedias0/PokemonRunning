@@ -97,13 +97,13 @@ fun RunningWrapper(
     } ?: "00:00:00"
     val totalAvgSpeed = viewModel.totalAvgSpeed.observeAsState().value?.let {
         val avgSpeed = (it * 10f).roundToInt() / 10f
-        "${avgSpeed} km/h"
+        "$avgSpeed km/h"
     }
     val totalCaloriesBurned by viewModel.totalCaloriesBurned.observeAsState("0kcal")
     val totalDistance = viewModel.totalDistance.observeAsState().value?.let {
         val km = it / 1000f
         val totalDistance = (km * 10f).roundToInt() / 10f
-        "${totalDistance} km"
+        "$totalDistance km"
     } ?: "0km"
     val sortByState = remember { mutableStateOf(viewModel.sortByState) }
     val sortByText = viewModel.sortByState.observeAsState()
@@ -348,7 +348,7 @@ fun LineChartWithShadow(
         gradientPath.moveTo(spacingOf16DpInPixels, height)
         dataPoint.forEachIndexed { index, curDataPoint ->
             var normX = curDataPoint.x.toRealX(xMax, width)
-            var normY = curDataPoint.y.toRealY(yMax, height)
+            val normY = curDataPoint.y.toRealY(yMax, height)
 
             if (index == 0) normX += spacingOf16DpInPixels
             if (index == dataPoint.size - 1) normX -= spacingOf16DpInPixels

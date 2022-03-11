@@ -4,7 +4,6 @@ import android.os.Build
 import androidx.annotation.RequiresApi
 import androidx.compose.foundation.Image
 import androidx.compose.foundation.background
-import androidx.compose.foundation.border
 import androidx.compose.foundation.layout.*
 import androidx.compose.foundation.shape.CircleShape
 import androidx.compose.foundation.shape.RoundedCornerShape
@@ -22,15 +21,11 @@ import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.text.TextStyle
-import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.input.KeyboardType
-import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.unit.dp
-import androidx.compose.ui.unit.sp
 import androidx.hilt.navigation.compose.hiltViewModel
 import androidx.navigation.NavController
 import com.example.pokedexapp.R
-import com.example.pokedexapp.favPokemons.FavPokemonsViewModel
 import com.example.pokedexapp.util.PermissionsHandler
 import com.example.pokedexapp.util.PokemonText
 import com.google.accompanist.permissions.ExperimentalPermissionsApi
@@ -88,7 +83,7 @@ fun ContentWrapper(
 ) {
     var textWeight by rememberSaveable { mutableStateOf("") }
     var textName by rememberSaveable { mutableStateOf("Text") }
-    var context = LocalContext.current
+    val context = LocalContext.current
 
     fun btnContinueOnClick(){
         val success = viewModel.writePersonalDataToSharedPref(textName, textWeight.toFloat(), context)

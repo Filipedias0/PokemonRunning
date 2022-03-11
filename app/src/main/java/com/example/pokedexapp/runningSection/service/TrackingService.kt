@@ -15,7 +15,6 @@ import android.os.Build
 import android.os.Looper
 import android.util.Log
 import android.widget.Toast
-import androidx.compose.ui.platform.LocalContext
 import androidx.core.app.NotificationCompat
 import androidx.lifecycle.LifecycleService
 import androidx.lifecycle.MutableLiveData
@@ -166,6 +165,7 @@ class TrackingService : LifecycleService() {
         }
     }
 
+    @SuppressLint("VisibleForTests")
     @OptIn(ExperimentalCoilApi::class)
     override fun onCreate() {
         super.onCreate()

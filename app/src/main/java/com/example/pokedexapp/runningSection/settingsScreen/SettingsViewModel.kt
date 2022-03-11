@@ -4,12 +4,7 @@ import android.content.Context
 import android.content.SharedPreferences
 import android.widget.Toast
 import androidx.compose.runtime.mutableStateOf
-import androidx.lifecycle.MediatorLiveData
-import androidx.lifecycle.MutableLiveData
 import androidx.lifecycle.ViewModel
-import com.example.pokedexapp.db.Run
-import com.example.pokedexapp.other.SortType
-import com.example.pokedexapp.repository.PokemonRunRepository
 import com.example.pokedexapp.util.constants.Constants.KEY_NAME
 import com.example.pokedexapp.util.constants.Constants.KEY_WEIGHT
 import dagger.hilt.android.lifecycle.HiltViewModel
@@ -17,7 +12,6 @@ import javax.inject.Inject
 
 @HiltViewModel
 class SettingsViewModel @Inject constructor(
-    private val repository: PokemonRunRepository,
     private val sharedPreferences: SharedPreferences
 ) : ViewModel() {
 

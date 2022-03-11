@@ -1,6 +1,5 @@
 package com.example.pokedexapp.pokemonList
 
-import android.util.Log
 import androidx.compose.foundation.Image
 import androidx.compose.foundation.background
 import androidx.compose.foundation.border
@@ -35,14 +34,9 @@ import coil.compose.rememberImagePainter
 import coil.request.ImageRequest
 import com.example.pokedexapp.R
 import com.example.pokedexapp.data.models.PokedexListEntry
-import com.plcoding.jetpackcomposepokedex.ui.theme.RobotoCondensed
+import com.example.pokedexapp.ui.theme.RobotoCondensed
 import androidx.compose.material.*
-import androidx.compose.ui.Alignment
 import androidx.hilt.navigation.compose.hiltViewModel
-import androidx.palette.graphics.Palette
-import kotlinx.coroutines.delay
-import kotlinx.coroutines.launch
-import timber.log.Timber
 
 @Composable
 fun PokemonListScreen(
@@ -278,7 +272,7 @@ fun PokedexRow(
     entries: List<PokedexListEntry>,
     navController: NavController
 ){
-    Column() {
+    Column {
         Row{
             PokedexEntry(
                 entry = entries[rowIndex * 2],

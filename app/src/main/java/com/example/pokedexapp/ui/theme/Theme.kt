@@ -6,8 +6,6 @@ import androidx.compose.material.darkColors
 import androidx.compose.material.lightColors
 import androidx.compose.runtime.Composable
 import androidx.compose.ui.graphics.Color
-import com.example.pokedexapp.ui.theme.LightBlue
-import com.plcoding.jetpackcomposepokedex.ui.theme.Typography
 
 private val DarkColorPalette = darkColors(
     primary = Color.Yellow,
@@ -28,7 +26,7 @@ private val LightColorPalette = lightColors(
 )
 
 @Composable
-fun PokedexAppTheme(darkTheme: Boolean = isSystemInDarkTheme(), content: @Composable() () -> Unit) {
+fun PokedexAppTheme(darkTheme: Boolean = isSystemInDarkTheme(), content: @Composable () -> Unit) {
     val colors = if (darkTheme) {
         DarkColorPalette
     } else {

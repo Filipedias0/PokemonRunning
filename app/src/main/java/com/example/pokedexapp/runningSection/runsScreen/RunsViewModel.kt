@@ -1,7 +1,6 @@
 package com.example.pokedexapp.runningSection.runsScreen
 
 import androidx.compose.runtime.mutableStateOf
-import androidx.compose.runtime.remember
 import androidx.lifecycle.MediatorLiveData
 import androidx.lifecycle.MutableLiveData
 import androidx.lifecycle.ViewModel
@@ -13,7 +12,7 @@ import javax.inject.Inject
 
 @HiltViewModel
 class RunsViewModel @Inject constructor(
-    private val repository: PokemonRunRepository
+    repository: PokemonRunRepository
 ) : ViewModel() {
 
     private val runsSortedByDate = repository.getAllRunsSortedByDate()

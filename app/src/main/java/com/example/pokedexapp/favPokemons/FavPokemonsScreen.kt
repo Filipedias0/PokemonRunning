@@ -4,31 +4,23 @@ import android.os.Build
 import androidx.compose.foundation.*
 import androidx.compose.foundation.layout.*
 import androidx.compose.foundation.lazy.LazyColumn
-import androidx.compose.foundation.shape.CircleShape
 import androidx.compose.foundation.shape.RoundedCornerShape
-import androidx.compose.material.CircularProgressIndicator
 import androidx.compose.material.MaterialTheme
 import androidx.compose.material.Surface
 import androidx.compose.material.Text
 import androidx.compose.runtime.*
 import androidx.compose.runtime.livedata.observeAsState
-import androidx.compose.ui.Alignment
 import androidx.compose.ui.Alignment.Companion.Center
 import androidx.compose.ui.Alignment.Companion.CenterHorizontally
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
 import androidx.compose.ui.draw.shadow
 import androidx.compose.ui.graphics.*
-import androidx.compose.ui.graphics.drawscope.drawIntoCanvas
 import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.res.painterResource
-import androidx.compose.ui.text.font.Font
-import androidx.compose.ui.text.font.FontFamily
-import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
-import androidx.core.content.res.ResourcesCompat
 import androidx.hilt.navigation.compose.hiltViewModel
 import androidx.navigation.NavController
 import coil.ImageLoader
@@ -36,13 +28,11 @@ import coil.annotation.ExperimentalCoilApi
 import coil.compose.rememberImagePainter
 import coil.decode.GifDecoder
 import coil.decode.ImageDecoderDecoder
-import coil.memory.MemoryCache
 import coil.request.ImageRequest
 import com.example.pokedexapp.R
 import com.example.pokedexapp.data.models.PokedexListEntry
 import com.example.pokedexapp.util.PokemonText
-import com.plcoding.jetpackcomposepokedex.ui.theme.RobotoCondensed
-import java.time.format.TextStyle
+import com.example.pokedexapp.ui.theme.RobotoCondensed
 
 @Composable
 fun FavPokemonsScreen(
@@ -171,7 +161,7 @@ fun PokedexEntry(
 
             imageLoader.enqueue(request)
 
-            var gifLoader = ImageLoader.Builder(LocalContext.current)
+            val gifLoader = ImageLoader.Builder(LocalContext.current)
                 .componentRegistry {
                     if (Build.VERSION.SDK_INT >= 28) {
                         add(ImageDecoderDecoder(LocalContext.current))
@@ -207,7 +197,7 @@ fun PokedexRow(
     entries: List<PokedexListEntry>,
     navController: NavController
 ){
-    Column() {
+    Column {
         Row{
             PokedexEntry(
                 entry = entries[rowIndex * 2],

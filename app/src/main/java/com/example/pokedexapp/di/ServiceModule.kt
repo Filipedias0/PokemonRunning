@@ -1,19 +1,14 @@
 package com.example.pokedexapp.di
 
+import android.annotation.SuppressLint
 import android.app.Notification
 import android.app.PendingIntent
 import android.content.Context
 import android.content.Intent
-import android.graphics.Bitmap
 import android.graphics.BitmapFactory
 import android.graphics.Color
-import android.graphics.drawable.BitmapDrawable
 import android.os.Build
-import androidx.compose.ui.platform.LocalContext
 import androidx.core.app.NotificationCompat
-import coil.ImageLoader
-import coil.compose.rememberImagePainter
-import coil.request.ImageRequest
 import com.example.pokedexapp.MainActivity
 import com.example.pokedexapp.R
 import com.example.pokedexapp.repository.PokemonRepository
@@ -30,6 +25,7 @@ import dagger.hilt.android.scopes.ServiceScoped
 @InstallIn(ServiceComponent::class)
 object ServiceModule {
 
+    @SuppressLint("VisibleForTests")
     @ServiceScoped
     @Provides
     fun provideFusedLocationProviderClient(
@@ -40,7 +36,7 @@ object ServiceModule {
     @Provides
     fun provideMainActivityPendingIntent(
         @ApplicationContext app: Context
-    ) = PendingIntent.getActivity(
+    ): PendingIntent = PendingIntent.getActivity(
         app,
         0,
         Intent(app, MainActivity::class.java),

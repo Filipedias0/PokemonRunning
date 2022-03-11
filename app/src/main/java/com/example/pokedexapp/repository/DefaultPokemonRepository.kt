@@ -6,10 +6,8 @@ import com.example.pokedexapp.data.remote.PokeApi
 import com.example.pokedexapp.data.remote.responses.Pokemon
 import com.example.pokedexapp.data.remote.responses.PokemonList
 import com.example.pokedexapp.db.PokemonDao
-import com.example.pokedexapp.db.PokemonDataBase
 import com.example.pokedexapp.util.Resource
 import dagger.hilt.android.scopes.ActivityScoped
-import java.lang.Exception
 import javax.inject.Inject
 
 @ActivityScoped

@@ -2,13 +2,10 @@ package com.example.pokedexapp.data.db
 
 import androidx.arch.core.executor.testing.InstantTaskExecutorRule
 import androidx.test.filters.MediumTest
-import com.example.pokedexapp.data.models.PokedexListEntry
-import com.example.pokedexapp.db.PokemonDao
 import com.example.pokedexapp.db.PokemonDataBase
 import com.example.pokedexapp.db.Run
 import com.example.pokedexapp.db.RunDAO
 import com.example.pokedexapp.getOrAwaitValue
-import com.google.common.truth.Truth
 import com.google.common.truth.Truth.assertThat
 import dagger.hilt.android.testing.HiltAndroidRule
 import dagger.hilt.android.testing.HiltAndroidTest

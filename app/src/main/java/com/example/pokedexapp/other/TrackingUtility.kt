@@ -3,7 +3,6 @@ package com.example.pokedexapp.other
 import android.Manifest
 import android.content.Context
 import android.location.Location
-import android.os.Build
 import com.example.pokedexapp.runningSection.service.Polyline
 import pub.devrel.easypermissions.EasyPermissions
 import java.util.concurrent.TimeUnit

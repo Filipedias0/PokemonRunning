@@ -1,7 +1,6 @@
 package com.example.pokedexapp.repository
 
 import androidx.lifecycle.LiveData
-import com.example.pokedexapp.data.models.PokedexListEntry
 import com.example.pokedexapp.db.Run
 import com.example.pokedexapp.db.RunDAO
 import javax.inject.Inject
