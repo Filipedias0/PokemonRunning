@@ -39,4 +39,10 @@ object Constants {
     const val KEY_NAME = "KEY_NAME"
 
     const val KEY_WEIGHT = "KEY_WEIGHT"
+
+    const val INTENT_COMMAND = "Command"
+
+    const val INTENT_COMMAND_REPLY = "Reply"
+
+    const val CODE_FOREGROUND_SERVICE = 1
 }

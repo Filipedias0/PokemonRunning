@@ -29,7 +29,10 @@ import com.example.pokedexapp.runningSection.startRunScreen.StartRunViewModel
 import com.example.pokedexapp.util.constants.Constants.ACTION_PAUSE_SERVICE
 import com.example.pokedexapp.util.constants.Constants.ACTION_START_OR_RESUME_SERVICE
 import com.example.pokedexapp.util.constants.Constants.ACTION_STOP_SERVICE
+import com.example.pokedexapp.util.constants.Constants.CODE_FOREGROUND_SERVICE
 import com.example.pokedexapp.util.constants.Constants.FASTEST_LOCATION_INTERVAL
+import com.example.pokedexapp.util.constants.Constants.INTENT_COMMAND
+import com.example.pokedexapp.util.constants.Constants.INTENT_COMMAND_REPLY
 import com.example.pokedexapp.util.constants.Constants.LOCATION_UPDATE_INTERVAL
 import com.example.pokedexapp.util.constants.Constants.NOTIFICATION_CHANNEL_GENERAL
 import com.example.pokedexapp.util.constants.Constants.NOTIFICATION_ID
@@ -46,11 +49,6 @@ import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.delay
 import kotlinx.coroutines.launch
 import javax.inject.Inject
-
-const val INTENT_COMMAND = "Command"
-const val INTENT_COMMAND_REPLY = "Reply"
-
-private const val CODE_FOREGROUND_SERVICE = 1
 
 typealias Polyline = MutableList<LatLng>
 typealias Polylines = MutableList<Polyline>
