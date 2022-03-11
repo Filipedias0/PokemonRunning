@@ -1,18 +1,15 @@
 package com.example.pokedexapp.runningSection.statisticsScreen
 
-import android.graphics.PointF
 import android.os.Build
 import androidx.annotation.RequiresApi
-import androidx.compose.foundation.Canvas
-import androidx.compose.foundation.Image
-import androidx.compose.foundation.background
-import androidx.compose.foundation.border
+import androidx.compose.foundation.*
 import androidx.compose.foundation.layout.*
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material.*
+import androidx.compose.material.icons.Icons
+import androidx.compose.material.icons.filled.Timeline
 import androidx.compose.runtime.*
 import androidx.compose.runtime.livedata.observeAsState
-import androidx.compose.runtime.saveable.rememberSaveable
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
@@ -24,32 +21,22 @@ import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.platform.LocalLifecycleOwner
 import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.text.font.FontWeight
-import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
-import androidx.core.content.ContextCompat
 import androidx.hilt.navigation.compose.hiltViewModel
-import androidx.lifecycle.LifecycleOwner
-import androidx.lifecycle.MutableLiveData
 import androidx.navigation.NavController
 import coil.ImageLoader
 import coil.compose.rememberImagePainter
 import coil.decode.GifDecoder
 import coil.decode.ImageDecoderDecoder
 import com.example.pokedexapp.R
-import com.example.pokedexapp.data.models.PokedexListEntry
 import com.example.pokedexapp.db.Run
 import com.example.pokedexapp.other.SortType
 import com.example.pokedexapp.other.TrackingUtility
-import com.example.pokedexapp.util.PermissionsHandler
+import com.example.pokedexapp.util.DropDown
 import com.example.pokedexapp.util.PokemonText
-import com.github.mikephil.charting.data.BarEntry
 import com.google.accompanist.permissions.ExperimentalPermissionsApi
-import java.lang.Math.round
-import java.text.SimpleDateFormat
-import java.util.*
 import kotlin.math.roundToInt
-import kotlin.random.Random
 
 @RequiresApi(Build.VERSION_CODES.Q)
 @ExperimentalPermissionsApi
@@ -118,15 +105,34 @@ fun RunningWrapper(
         val totalDistance = (km * 10f).roundToInt() / 10f
         "${totalDistance} km"
     } ?: "0km"
-    val runsSortedByDate by viewModel.runsSortedByDate.observeAsState()
+    val sortByState = remember { mutableStateOf(viewModel.sortByState) }
+    val sortByText = viewModel.sortByState.observeAsState()
+    val options = listOf("Distance", "Running time", "Avg Speed", "Calories burned")
+    val runs by viewModel.runsMediator.observeAsState(listOf())
+    val lifecycleOwner = LocalLifecycleOwner.current
+
+    fun subscribeToObservers() {
+        sortByState.value.observe(lifecycleOwner) { sortBy ->
+            when (sortBy) {
+                options[0] -> viewModel.sortRuns(SortType.DISTANCE)
+                options[1] -> viewModel.sortRuns(SortType.RUNNING_TIME)
+                options[2] -> viewModel.sortRuns(SortType.AVG_SPEED)
+                options[3] -> viewModel.sortRuns(SortType.CALORIES_BURNED)
+            }
+        }
+    }
 
     Column(
         horizontalAlignment = Alignment.CenterHorizontally,
         verticalArrangement = Arrangement.Top,
-        modifier = modifier,
+        modifier = modifier
+            .verticalScroll(
+                state = rememberScrollState(),
+            ),
     ) {
+        subscribeToObservers()
 
-        var gifLoader = ImageLoader.Builder(LocalContext.current)
+        val gifLoader = ImageLoader.Builder(LocalContext.current)
             .componentRegistry {
                 if (Build.VERSION.SDK_INT >= 28) {
                     add(ImageDecoderDecoder(LocalContext.current))
@@ -250,8 +256,45 @@ fun RunningWrapper(
                 )
             }
         }
-        Spacer(modifier = Modifier.height(10.dp))
-        LineChartWithShadow(getDataPoints(viewModel))
+
+        Row(
+            horizontalArrangement = Arrangement.Start,
+            verticalAlignment = Alignment.CenterVertically,
+            modifier = Modifier
+                .fillMaxWidth()
+                .padding(vertical = 20.dp)
+        ) {
+            Row(
+                horizontalArrangement = Arrangement.SpaceEvenly,
+                verticalAlignment = Alignment.Top,
+                modifier = Modifier
+                    .fillMaxWidth()
+            ) {
+                DropDown(
+                    text = "${sortByText.value} ${
+                        if (sortByText.value == "Running time") "evolution"
+                        else "over time"
+                    }",
+                    options = options,
+                    sortByState = sortByState.value,
+                    modifier = Modifier
+                        .fillMaxWidth(0.8f)
+                )
+
+                Icon(
+                    imageVector = Icons.Default.Timeline, contentDescription = "Filter",
+                    tint = Color(255, 203, 8),
+                    modifier = Modifier
+                        .size(36.dp)
+                        .offset(y = 4.dp)
+                )
+
+            }
+        }
+
+        LineChartWithShadow(getDataPoints(runs))
+
+        Spacer(modifier = Modifier.height(22.dp))
     }
 }
 
@@ -273,7 +316,7 @@ fun LineChartWithShadow(
     Canvas(
         modifier = Modifier
             .fillMaxWidth(1f)
-            .fillMaxHeight(0.5f)
+            .height(100.dp)
     ) {
         val width = size.width
         val height = size.height
@@ -282,7 +325,7 @@ fun LineChartWithShadow(
         val verticalAxisLineEndOffset = Offset(spacingOf16DpInPixels, height)
 
         drawLine(
-            Color(0,103,180),
+            Color(0, 103, 180),
             verticalAxisLineStartOffset,
             verticalAxisLineEndOffset,
             strokeWidth = Stroke.DefaultMiter
@@ -292,7 +335,7 @@ fun LineChartWithShadow(
         val horizontalAxisLineEndOffset = Offset(width - spacingOf16DpInPixels, height)
 
         drawLine(
-            Color(0,103,180),
+            Color(0, 103, 180),
             horizontalAxisLineStartOffset,
             horizontalAxisLineEndOffset,
             strokeWidth = Stroke.DefaultMiter
@@ -315,13 +358,14 @@ fun LineChartWithShadow(
                 var nextNormXPoint = dataPoint[index + 1].x.toRealX(xMax, width)
 
                 if (index == dataPoint.size - 2)
-                    nextNormXPoint = dataPoint[index + 1].x.toRealX(xMax, width = width) - spacingOf16DpInPixels
+                    nextNormXPoint =
+                        dataPoint[index + 1].x.toRealX(xMax, width = width) - spacingOf16DpInPixels
 
                 val nextNormYPoint = dataPoint[index + 1].y.toRealY(yMax, height)
                 val offsetEnd = Offset(nextNormXPoint, nextNormYPoint)
 
                 drawLine(
-                    Color(0,103,180),
+                    Color(0, 103, 180),
                     offsetStart,
                     offsetEnd,
                     strokeWidth = Stroke.DefaultMiter
@@ -348,21 +392,22 @@ fun LineChartWithShadow(
             close()
             drawPath(
                 this,
-                brush = Brush.verticalGradient(colors = listOf(
-                    Color(0,103,180),
-                    Color(0xFFAFFFC)
-                ))
+                brush = Brush.verticalGradient(
+                    colors = listOf(
+                        Color(0, 103, 180),
+                        Color(0xFFAFFFC)
+                    )
+                )
             )
         }
     }
 }
 
 @Composable
-fun getDataPoints(viewModel: StatisticsViewModel): List<DataPoint> {
-    val lineChartData by  viewModel.runsSortedByDate.observeAsState()
-    val avgSpeeds = lineChartData?.map { run -> run.avgSpeedInKMH }
+fun getDataPoints(runs: List<Run>): List<DataPoint> {
+    val avgSpeeds = runs.map { run -> run.avgSpeedInKMH }
 
-    return avgSpeeds?.mapIndexed { i, data ->
+    return avgSpeeds.mapIndexed { i, data ->
         DataPoint(i.toFloat(), data)
-    } ?: listOf(DataPoint(1f, 1f))
+    }
 }

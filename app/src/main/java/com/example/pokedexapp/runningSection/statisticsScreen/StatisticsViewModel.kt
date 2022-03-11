@@ -1,5 +1,6 @@
 package com.example.pokedexapp.runningSection.statisticsScreen
 
+import androidx.compose.runtime.mutableStateOf
 import androidx.lifecycle.MediatorLiveData
 import androidx.lifecycle.MutableLiveData
 import androidx.lifecycle.ViewModel
@@ -19,5 +20,51 @@ class StatisticsViewModel @Inject constructor(
     val totalCaloriesBurned = repository.getTotalCaloriesBurned()
     val totalAvgSpeed = repository.getTotalAvgSpeed()
 
-    val runsSortedByDate = repository.getAllRunsSortedByDate()
+    private val runsSortedByDistance = repository.getAllRunsSortedByDistance()
+    private val runsSortedByCaloriesBurned = repository.getAllRunsSortedByCaloriesBurned()
+    private val runsSortedByTimeInMillis = repository.getAllRunsSortedByTimeInMillis()
+    private val runsSortedByAvgSpeed = repository.getAllRunsSortedByAvgSpeed()
+    var sortByState = MutableLiveData("Distance")
+
+    val runsMediator = MediatorLiveData<List<Run>>()
+
+    private var sortType = SortType.DISTANCE
+
+    init {
+
+        runsMediator.addSource(runsSortedByAvgSpeed) { result ->
+            if(sortType == SortType.AVG_SPEED){
+                result?.let { runsMediator.value = it }
+            }
+        }
+
+        runsMediator.addSource(runsSortedByDistance) { result ->
+            if(sortType == SortType.DISTANCE){
+                result?.let { runsMediator.value = it }
+            }
+        }
+
+        runsMediator.addSource(runsSortedByCaloriesBurned) { result ->
+            if(sortType == SortType.CALORIES_BURNED){
+                result?.let { runsMediator.value = it }
+            }
+        }
+
+        runsMediator.addSource(runsSortedByTimeInMillis) { result ->
+            if(sortType == SortType.RUNNING_TIME){
+                result?.let { runsMediator.value = it }
+            }
+        }
+    }
+
+    fun sortRuns(sortType: SortType) = when(sortType){
+        SortType.RUNNING_TIME -> runsSortedByTimeInMillis.value?.let{ runsMediator.value = it }
+        SortType.AVG_SPEED -> runsSortedByAvgSpeed.value?.let{ runsMediator.value = it }
+        SortType.DISTANCE -> runsSortedByDistance.value?.let{ runsMediator.value = it }
+        SortType.CALORIES_BURNED -> runsSortedByCaloriesBurned.value?.let{ runsMediator.value = it }
+        //We don't use date here
+        SortType.DATE -> TODO()
+    }.also {
+        this.sortType = sortType
+    }
 }

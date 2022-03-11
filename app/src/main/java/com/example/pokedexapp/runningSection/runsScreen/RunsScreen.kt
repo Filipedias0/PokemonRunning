@@ -47,6 +47,7 @@ import com.example.pokedexapp.R
 import com.example.pokedexapp.db.Run
 import com.example.pokedexapp.other.SortType
 import com.example.pokedexapp.other.TrackingUtility
+import com.example.pokedexapp.util.DropDown
 import com.example.pokedexapp.util.PermissionsHandler
 import com.google.accompanist.permissions.ExperimentalPermissionsApi
 import java.text.SimpleDateFormat
@@ -70,12 +71,12 @@ fun RunsScreen(
                 .fillMaxSize()
                 .padding(top = 20.dp)
         ) {
-                Image(
-                    painter = painterResource(id = R.drawable.ic_international_pok_mon_logo),
-                    contentDescription = "Pokemon",
-                    modifier = Modifier
-                        .fillMaxWidth()
-                )
+            Image(
+                painter = painterResource(id = R.drawable.ic_international_pok_mon_logo),
+                contentDescription = "Pokemon",
+                modifier = Modifier
+                    .fillMaxWidth()
+            )
 
             Spacer(modifier = Modifier.height(16.dp))
 
@@ -114,11 +115,11 @@ fun RunningWrapper(
     val sortByState = remember { mutableStateOf(viewModel.sortByState) }
     val sortByText = viewModel.sortByState.observeAsState()
     val options = listOf("Date", "Distance", "Running time", "Avg Speed", "Calories burned")
-    val runs by  viewModel.runsMediator.observeAsState(listOf())
+    val runs by viewModel.runsMediator.observeAsState(listOf())
     val lifecycleOwner = LocalLifecycleOwner.current
     val isLoading = viewModel.loading.value
 
-    fun subscribeToObservers(){
+    fun subscribeToObservers() {
         sortByState.value.observe(lifecycleOwner) { sortBy ->
             when (sortBy) {
                 options[0] -> viewModel.sortRuns(SortType.DATE)
@@ -137,14 +138,49 @@ fun RunningWrapper(
     ) {
         subscribeToObservers()
 
-        DropDownRow(
-            text = "Sort By: ${sortByText.value}",
-            options = options,
-            sortByState = sortByState.value,
-            navController = navController
-        )
+        Row(
+            verticalAlignment = Alignment.Top,
+            horizontalArrangement = Arrangement.SpaceBetween,
+            modifier = Modifier
+                .fillMaxWidth()
+                .padding(
+                    top = 5.dp,
+                )
+        ) {
 
-        if(isLoading){
+            DropDown(
+                text = "Sort By: ${sortByText.value}",
+                options = options,
+                sortByState = sortByState.value,
+                modifier = Modifier
+                    .fillMaxWidth(0.6f)
+            )
+
+                Icon(
+                    imageVector = Icons.Default.Settings,
+                    contentDescription = "Settings",
+                    tint = Color.White,
+                    modifier = Modifier
+                        .size(36.dp)
+                        .offset(y = 4.dp)
+                        .clickable {
+                            navController.navigate("settings_screen")
+                        }
+                )
+
+                Icon(
+                    imageVector = Icons.Default.Face,
+                    contentDescription = "Statistics screen",
+                    tint = Color.White,
+                    modifier = Modifier
+                        .size(36.dp)
+                        .offset(y = 4.dp)
+                        .clickable {
+                            navController.navigate("statistics_screen")
+                        }
+                )
+        }
+        if (isLoading) {
             CircularProgressIndicator(
                 color = MaterialTheme.colors.primary,
                 modifier = Modifier
@@ -160,17 +196,17 @@ fun RunningWrapper(
                 .fillMaxWidth()
                 .fillMaxHeight()
                 .padding(vertical = 12.dp)
-        ){
+        ) {
             LazyColumn(
                 modifier = Modifier
                     .fillMaxWidth()
                     .fillMaxHeight()
-            ){
+            ) {
 
-                items(runs){ item ->
+                items(runs) { item ->
                     RunSection(item)
                     Spacer(modifier = Modifier.height(22.dp))
-                    if(runs.last() == item){
+                    if (runs.last() == item) {
                         Spacer(modifier = Modifier.height(50.dp))
                     }
                 }
@@ -194,7 +230,7 @@ fun RunningWrapper(
                         )
                     },
                     backgroundColor = Color(255, 203, 8),
-                    contentColor = Color(0,103,180),
+                    contentColor = Color(0, 103, 180),
                     modifier = Modifier
                         .zIndex(2f)
                 ) {
@@ -205,147 +241,6 @@ fun RunningWrapper(
     }
 }
 
-@Composable
-fun DropDownRow(
-    text: String,
-    initiallyOpened: Boolean = false,
-    options: List<String>,
-    sortByState: MutableLiveData<String>,
-    navController: NavController
-) {
-    var isOpen by remember {
-        mutableStateOf(initiallyOpened)
-    }
-
-    val alpha = animateFloatAsState(
-        targetValue = if (isOpen) 1f else 0f,
-        animationSpec = tween(
-            durationMillis = 300
-        )
-    )
-
-    val rotateX = animateFloatAsState(
-        targetValue = if (isOpen) 0f else -90f,
-        animationSpec = tween(
-            durationMillis = 300
-        )
-    )
-
-    Row(
-        verticalAlignment = Alignment.CenterVertically,
-        horizontalArrangement = Arrangement.SpaceBetween,
-        modifier = Modifier
-            .fillMaxWidth()
-    ) {
-
-        Column {
-
-        Row {
-
-            Column(
-                horizontalAlignment = Start,
-                modifier = Modifier
-                    .fillMaxWidth(0.6F)
-                    .clickable {
-                        isOpen = !isOpen
-                    }
-                    .shadow(10.dp, RoundedCornerShape(10.dp))
-                    .background(Color(255, 203, 8))
-                    .padding(12.dp, 8.dp, 12.dp, 0.dp)
-            ) {
-                Row(
-                    horizontalArrangement = Arrangement.SpaceBetween,
-                    modifier = Modifier
-                        .fillMaxWidth()
-                ) {
-                    Text(
-                        text = text,
-                        fontWeight = FontWeight.Medium,
-                        color = Color(0, 103, 180),
-                        fontSize = 20.sp,
-                    )
-                    Icon(
-                        imageVector = Icons.Default.ArrowDropDown,
-                        contentDescription = "Open or close the dropdown",
-                        tint = Color(0, 103, 180),
-                        modifier = Modifier
-                            .scale(1f, if (isOpen) -1f else 1f)
-                    )
-
-                }
-
-                Spacer(modifier = Modifier.height(10.dp))
-            }
-
-            Row(
-                verticalAlignment = Alignment.CenterVertically,
-                horizontalArrangement = Arrangement.SpaceBetween,
-                modifier = Modifier
-                    .fillMaxWidth()
-                    .padding(
-                        top = 5.dp,
-                        start = 22.dp
-                    )
-            ){
-
-                Icon(
-                    imageVector = Icons.Default.Settings,
-                    contentDescription = "Settings",
-                    tint = Color.White,
-                    modifier = Modifier
-                        .size(36.dp)
-                        .clickable {
-                            navController.navigate("settings_screen")
-                        }
-                )
-
-                Icon(
-                    imageVector = Icons.Default.Face,
-                    contentDescription = "Statistics screen",
-                    tint = Color.White,
-                    modifier = Modifier
-                        .size(36.dp)
-                        .clickable {
-                            navController.navigate("statistics_screen")
-                        }
-                )
-
-            }
-
-        }
-
-        if (isOpen) {
-            Column(
-                horizontalAlignment = Start,
-                modifier = Modifier
-                    .graphicsLayer {
-                        transformOrigin = TransformOrigin(0.5f, 0f)
-                        rotationX = rotateX.value
-                    }
-                    .alpha(alpha.value)
-                    .fillMaxWidth(0.6F)
-                    .shadow(10.dp, RoundedCornerShape(10.dp))
-                    .background(Color(255, 203, 8))
-                    .padding(12.dp, 8.dp, 12.dp, 12.dp)
-            ) {
-                options.forEach {
-                    Text(
-                        text = it,
-                        fontSize = 18.sp,
-                        color = Color(0, 103, 180),
-                        textAlign = TextAlign.Start,
-                        modifier = Modifier
-                            .clickable {
-                                sortByState.postValue(it)
-                                isOpen = false
-                            }
-                    )
-                }
-            }
-        }
-    }
-    }
-}
 
 @Composable
 fun RunSection(run: Run) {
@@ -365,13 +260,13 @@ fun RunSection(run: Run) {
             .shadow(10.dp, RoundedCornerShape(10.dp))
             .background(Color(255, 203, 8))
             .padding(12.dp, 8.dp)
-            ){
+    ) {
         Text(
             color = Color(0, 103, 180),
             text = date,
             modifier = Modifier
                 .padding(bottom = 6.dp)
-            )
+        )
 
         run.img?.asImageBitmap()?.let {
             Image(
@@ -388,10 +283,13 @@ fun RunSection(run: Run) {
                 .fillMaxWidth()
                 .padding(top = 6.dp)
         ) {
-            Text(color = Color(0, 103, 180), text = run.avgSpeedInKMH.toString()+"km/h")
-            Text(color = Color(0, 103, 180), text =run.caloriesBurned.toString()+"Kcal")
-            Text(color = Color(0, 103, 180), text =run.distanceInMeters.toString()+"m")
-            Text(color = Color(0, 103, 180), text =TrackingUtility.getFormattedStopWatchTime(run.timeInMillis)+"ms")
+            Text(color = Color(0, 103, 180), text = run.avgSpeedInKMH.toString() + "km/h")
+            Text(color = Color(0, 103, 180), text = run.caloriesBurned.toString() + "Kcal")
+            Text(color = Color(0, 103, 180), text = run.distanceInMeters.toString() + "m")
+            Text(
+                color = Color(0, 103, 180),
+                text = TrackingUtility.getFormattedStopWatchTime(run.timeInMillis) + "ms"
+            )
         }
     }
 }

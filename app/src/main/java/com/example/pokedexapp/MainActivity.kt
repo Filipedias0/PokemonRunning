@@ -231,7 +231,7 @@ fun SplashScreen(
         contentAlignment = Alignment.Center,
         modifier = Modifier
             .fillMaxSize()
-            .background(MaterialTheme.colors.secondary)
+            .background(Color(8, 95, 150))
     ){
         Image(
             painter = painterResource(id = R.drawable.poke_ball_pin),

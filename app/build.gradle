@@ -60,6 +60,7 @@ dependencies {
     implementation 'pub.devrel:easypermissions:3.0.0'
     implementation 'com.google.accompanist:accompanist-permissions:0.22.0-rc'
 
+    implementation "androidx.compose.material:material-icons-extended:$compose_version"
 
     //maps
     implementation("com.google.android.libraries.maps:maps:3.1.0-beta")
