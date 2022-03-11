@@ -237,6 +237,7 @@ fun SplashScreen(
             painter = painterResource(id = R.drawable.poke_ball_pin),
             contentDescription = "PokéBall pin (app icon)",
             modifier = Modifier
+                .size(220.dp)
                 .scale(scale.value)
         )
 

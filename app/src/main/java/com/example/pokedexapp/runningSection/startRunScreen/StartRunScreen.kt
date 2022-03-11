@@ -90,8 +90,8 @@ fun StartRunScreen(
             textTimer.value = formattedTime
         }
 
-        StartRunViewModel.saveRun.observe(lifecycleOwner){
-            if(it != null) {
+        StartRunViewModel.saveRun.observe(lifecycleOwner) {
+            if (it != null) {
                 viewModel.insertRun(it)
                 StartRunViewModel.saveRun.postValue(null)
                 textTimer.value = "00:00:00:00"
@@ -101,9 +101,9 @@ fun StartRunScreen(
             }
         }
 
-        viewModel.favPokemonsLiveData.observe(lifecycleOwner){ pokemonList ->
+        viewModel.favPokemonsLiveData.observe(lifecycleOwner) { pokemonList ->
 
-            val randomPokemonNumber: Int = if(pokemonList.isEmpty()) 25
+            val randomPokemonNumber: Int = if (pokemonList.isEmpty()) 25
             else pokemonList[(pokemonList.indices).random()].number
 
             StartRunViewModel.pokemonNumber.postValue(randomPokemonNumber)
@@ -117,11 +117,11 @@ fun StartRunScreen(
 
             val request = ImageRequest.Builder(context)
                 .data(url)
-                .target{
+                .target {
                     val bmp = (it as BitmapDrawable).bitmap.copy(Bitmap.Config.ARGB_8888, true)
                     StartRunViewModel.pokemonIconMarker.postValue(bmp)
                 }
-                .size(width = 160, height =  160)
+                .size(width = 160, height = 160)
                 .build()
 
             imageLoader.enqueue(request)
@@ -135,7 +135,7 @@ fun StartRunScreen(
         PermissionsHandler(showAlert = showPermissionsDialog)
         subscribeToObservers()
 
-        if(showFinishRunDialog.value){
+        if (showFinishRunDialog.value) {
             FinishRunDialog(
                 showAlert = showFinishRunDialog,
                 context = LocalContext.current,
@@ -161,7 +161,7 @@ fun StartRunScreen(
                 .shadow(10.dp, RoundedCornerShape(10.dp))
                 .clip(RoundedCornerShape(10.dp))
                 .background(MaterialTheme.colors.secondary),
-            showFinishRunDialog =   showFinishRunDialog,
+            showFinishRunDialog = showFinishRunDialog,
             textTimer = textTimer,
         )
     }
@@ -173,14 +173,14 @@ fun RunningWrapper(
     modifier: Modifier = Modifier,
     showFinishRunDialog: MutableState<Boolean>,
     textTimer: MutableState<String>,
-    ) {
+) {
     val isTracking by TrackingService.isTracking.observeAsState(false)
     lateinit var context: Context
 
-    fun toggleRun(){
-        if(isTracking){
+    fun toggleRun() {
+        if (isTracking) {
             sendCommandToService(ACTION_PAUSE_SERVICE, context)
-        }else{
+        } else {
             sendCommandToService(ACTION_START_OR_RESUME_SERVICE, context)
         }
     }
@@ -230,9 +230,10 @@ fun RunningWrapper(
                 toggleRun()
             },
             shape = RoundedCornerShape(20.dp),
-            colors = ButtonDefaults.buttonColors(Color(255,203,8))){
+            colors = ButtonDefaults.buttonColors(Color(255, 203, 8))
+        ) {
             PokemonText(
-                text = if(!isTracking) "Start" else "Stop",
+                text = if (!isTracking) "Start" else "Stop",
                 fontSize = 42f,
                 modifier = Modifier
                     .fillMaxWidth()
@@ -240,7 +241,7 @@ fun RunningWrapper(
             )
         }
 
-        if (isTracking){
+        if (isTracking) {
             Button(
                 modifier = Modifier
                     .fillMaxWidth(0.5f)
@@ -267,7 +268,7 @@ fun RunningWrapper(
 }
 
 @Composable
-fun MapHandler( ) {
+fun MapHandler() {
     val mapView = rememberMapViewWithLifeCycle()
     var map: GoogleMap? = null
     val pathPoints by TrackingService.pathPoints.observeAsState()
@@ -276,15 +277,17 @@ fun MapHandler( ) {
 
     val context = LocalContext.current
     var curTimeInMillis = 0L
-    var userLocationMarker = map?.addMarker(
-        MarkerOptions()
-            .title("User Pokemon")
-    )
+    var userLocationMarker =
+            map?.addMarker(
+                MarkerOptions()
+                    .title("User Pokemon")
+            )
 
-    fun zoomToSeeWholeTrack(){
+
+    fun zoomToSeeWholeTrack() {
         val bounds = LatLngBounds.Builder()
-        for(polyline in pathPoints!!){
-            for(pos in polyline) {
+        for (polyline in pathPoints!!) {
+            for (pos in polyline) {
                 bounds.include(pos)
             }
         }
@@ -298,22 +301,23 @@ fun MapHandler( ) {
         )
     }
 
-    fun cancelRun(){
+    fun cancelRun() {
         sendCommandToService(context = context, command = ACTION_STOP_SERVICE)
     }
 
-    fun endRunAndSaveToDb(){
+    fun endRunAndSaveToDb() {
         map?.snapshot { bmp ->
             var distanceInMeters = 0
-            for(polyline in pathPoints!!){
+            for (polyline in pathPoints!!) {
                 distanceInMeters += TrackingUtility.calculatePolylineLenght(polyline).toInt()
             }
             val avgSpeed = round(
-                (distanceInMeters / 1000f) / ( curTimeInMillis/ 1000f / 60 / 60)*10
+                (distanceInMeters / 1000f) / (curTimeInMillis / 1000f / 60 / 60) * 10
             ) / 10f
             val dateTimeStamp = Calendar.getInstance().timeInMillis
-            val caloriesBurned = ((distanceInMeters /1000f) * weight) .toInt()
-            val run = Run( bmp, dateTimeStamp, avgSpeed, distanceInMeters, curTimeInMillis, caloriesBurned)
+            val caloriesBurned = ((distanceInMeters / 1000f) * weight).toInt()
+            val run =
+                Run(bmp, dateTimeStamp, avgSpeed, distanceInMeters, curTimeInMillis, caloriesBurned)
 
             StartRunViewModel.saveRun.postValue(run)
             Toast.makeText(
@@ -345,12 +349,6 @@ fun MapHandler( ) {
     }
 
     fun addLatestPolyline() {
-        //TODO make the favorite pokemon run in the map ex
-        // val markerOptions = MarkerOptions()
-        //                    .title("PickupPosition")
-        //                    .position(pickUp)
-        //                map!!.addMarker(markerOptions)
-
         //use the previously created marker
 
         if (pathPoints!!.isNotEmpty() && pathPoints!!.last().size > 1) {
@@ -359,8 +357,8 @@ fun MapHandler( ) {
             location.latitude = lastLatLng.latitude
             location.longitude = lastLatLng.longitude
 
-            userLocationMarker!!.position = (lastLatLng)
-            userLocationMarker!!.rotation = location.bearing
+            userLocationMarker?.position = (lastLatLng)
+            userLocationMarker?.rotation = location.bearing
 
             val preLastLatLng = pathPoints!!.last()[pathPoints!!.last().size - 2]
             val polylineOptions = PolylineOptions()
@@ -372,7 +370,7 @@ fun MapHandler( ) {
         }
     }
 
-    fun subscribeToObservers(){
+    fun subscribeToObservers() {
         TrackingService.pathPoints.observe(lifecycleOwner) {
             addLatestPolyline()
             moveCameraToUser()
@@ -384,12 +382,14 @@ fun MapHandler( ) {
                 location.longitude = lastLatLng.longitude
 
                 //Create the marker that will be animated
-                val markerOptions =   MarkerOptions()
+                val markerOptions = MarkerOptions()
                     .position(lastLatLng)
                     .rotation(location.bearing)
                     .anchor(0.5F, 0.5F)
-                    .icon(BitmapDescriptorFactory.fromBitmap(
-                        StartRunViewModel.pokemonIconMarker.value)
+                    .icon(
+                        BitmapDescriptorFactory.fromBitmap(
+                            StartRunViewModel.pokemonIconMarker.value
+                        )
                     )
 
                 userLocationMarker = map?.addMarker(markerOptions)!!
@@ -403,7 +403,7 @@ fun MapHandler( ) {
 
                 val request = ImageRequest.Builder(context)
                     .data(R.drawable.poke_ball_pin)
-                    .target{
+                    .target {
                         val bmp = (it as BitmapDrawable).bitmap.copy(Bitmap.Config.ARGB_8888, true)
 
                         map?.addMarker(
@@ -412,7 +412,7 @@ fun MapHandler( ) {
                                 .icon(BitmapDescriptorFactory.fromBitmap(bmp))
                         )
                     }
-                    .size(width = 80, height =  80)
+                    .size(width = 80, height = 80)
                     .build()
 
                 imageLoader.enqueue(request)
@@ -421,8 +421,8 @@ fun MapHandler( ) {
             }
         }
 
-        TrackingService.endRunAndSaveIntoDb.observe(lifecycleOwner){
-            if(it == true) {
+        TrackingService.endRunAndSaveIntoDb.observe(lifecycleOwner) {
+            if (it == true) {
                 zoomToSeeWholeTrack()
                 endRunAndSaveToDb()
                 TrackingService.endRunAndSaveIntoDb.postValue(false)
@@ -496,7 +496,7 @@ fun FinishRunDialog(
 ) {
     val title = "Finish run"
 
-    fun cancelRun(){
+    fun cancelRun() {
         sendCommandToService(context = context, command = ACTION_STOP_SERVICE)
         TrackingService.timeRunInMillis.postValue(0L)
         textTimer.value = "00:00:00:00"
@@ -517,7 +517,7 @@ fun FinishRunDialog(
                 }
             }
         },
-        text = {Text(text = "Dismiss to cancel")},
+        text = { Text(text = "Dismiss to cancel") },
 
         confirmButton = {
             Button(onClick = {
