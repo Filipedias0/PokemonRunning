@@ -108,7 +108,7 @@ fun RunningWrapper(
     val sortByState = remember { mutableStateOf(viewModel.sortByState) }
     val sortByText = viewModel.sortByState.observeAsState()
     val options = listOf("Distance", "Running time", "Avg Speed", "Calories burned")
-    val runs by viewModel.runsMediator.observeAsState(listOf())
+    val runs = viewModel.runsMediator.observeAsState(listOf())
     val lifecycleOwner = LocalLifecycleOwner.current
 
     fun subscribeToObservers() {
@@ -292,7 +292,7 @@ fun RunningWrapper(
             }
         }
 
-        LineChartWithShadow(getDataPoints(runs))
+        LineChartWithShadow(getDataPoints(runs.value))
 
         Spacer(modifier = Modifier.height(22.dp))
     }
@@ -372,11 +372,14 @@ fun LineChartWithShadow(
                 )
             }
 
-            drawCircle(
-                Color(255, 203, 8),
-                radius = 6.dp.toPx(),
-                Offset(normX, normY)
-            )
+            if(!normX.isNaN() || !normY.isNaN()){
+                drawCircle(
+                    Color(255, 203, 8),
+                    radius = 6.dp.toPx(),
+                    Offset(normX, normY)
+                )
+            }
+
             with(
                 gradientPath
             ) {
