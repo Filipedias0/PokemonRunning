@@ -27,3 +27,4 @@ To run the project you will need to:
 - LiveData
 - MutableState
 - Foreground Service
+- Animations
