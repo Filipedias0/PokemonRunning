@@ -24,3 +24,6 @@ To run the project you will need to:
 - Google Maps
 - Retrofit
 - Coroutines
+- LiveData
+- MutableState
+- Foreground Service
